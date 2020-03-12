@@ -16,7 +16,7 @@ ServerTools is Pocketmine-MP plugin containing a set of tools that allows you to
 ## File Explorer
 **Permission:** _st.ui.file-explorer_
 
-It allows to explore and edit your server folder and files. 
+It allows to explore and edit your server folder and files.
 
 ![FileExplorer](https://github.com/matcracker/ServerTools/blob/master/.github/README_IMAGES/Form_FileExplorer.png)
 
