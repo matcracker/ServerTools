@@ -1,0 +1,22 @@
+name: ServerTools
+main: matcracker\ServerTools\Main
+version: 0.1.0
+api: [3.0.0]
+
+load: POSTWORLD
+author: matcracker
+description: "ServerTools is a set of tools that allows you to manage your server directly from the game!"
+website: https://github.com/matcracker/ServerTools
+permissions:
+  st.command.servertools:
+    description: "Allows the user to run the command /servertools"
+    default: op
+  st.ui.file-explorer:
+    description: "Allows to use the file explorer function"
+    default: op
+  st.ui.clone:
+    description: "Allows to use the cloning function"
+    default: op
+  st.ui.restart:
+    description: "Allows to use the restart function"
+    default: op

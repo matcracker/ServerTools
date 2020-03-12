@@ -1,0 +1,13 @@
+branches:
+  - master
+pulls: false
+projects:
+  ServerTools:
+    path: ""
+    icon: resources/servertools_logo.png
+    libs:
+      - src: JackMD/UpdateNotifier/UpdateNotifier
+        version: 1.0.0
+      - src: matcracker/FormLib/FormLib
+        version: 1.1.1
+...
