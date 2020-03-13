@@ -41,7 +41,7 @@ final class Main extends PluginBase{
 	public function onEnable() : void{
 		@mkdir($this->getDataFolder());
 
-		$this->getServer()->getCommandMap()->register('servertools', new ServerToolsCommand());
+		$this->getServer()->getCommandMap()->register('servertools', new ServerToolsCommand($this));
 		$this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
 	}
 

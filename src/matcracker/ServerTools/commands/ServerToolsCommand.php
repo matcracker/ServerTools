@@ -27,20 +27,25 @@ use matcracker\ServerTools\forms\BaseForms;
 use matcracker\ServerTools\Main;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
+use pocketmine\command\PluginIdentifiableCommand;
 use pocketmine\Player;
+use pocketmine\plugin\Plugin;
 use pocketmine\utils\TextFormat;
 
-final class ServerToolsCommand extends Command{
+final class ServerToolsCommand extends Command implements PluginIdentifiableCommand{
 
-	public function __construct(){
+	private $plugin;
+
+	public function __construct(Main $plugin){
 		parent::__construct(
 			'servertools',
 			'Main command for ServerTools plugin.',
 			'/servertools',
 			['servertool', 'st']
 		);
+		$this->plugin = $plugin;
 		$this->setPermission("st.command.servertools");
-		$this->setPermissionMessage(Main::formatMessage(TextFormat::RED . "You do not have permission to use this command"));
+		$this->setPermissionMessage($this->plugin::formatMessage(TextFormat::RED . "You do not have permission to use this command"));
 	}
 
 	public function execute(CommandSender $sender, string $commandLabel, array $args) : bool{
@@ -59,4 +64,7 @@ final class ServerToolsCommand extends Command{
 		return true;
 	}
 
+	public function getPlugin() : Plugin{
+		return $this->plugin;
+	}
 }
