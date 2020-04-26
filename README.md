@@ -21,10 +21,10 @@ It allows to explore and edit your server folder and files.
 ![FileExplorer](https://github.com/matcracker/ServerTools/blob/master/.github/README_IMAGES/Form_FileExplorer.png)
 
 ### Reading file example
-![ReadFile](https://github.com/matcracker/ImageContainer/blob/master/Form_FE_ReadFile.gif)
+![ReadFile](https://github.com/matcracker/ImageContainer/blob/master/ServerTools/Form_FE_ReadFile.gif)
 
 ### Editing file example
-![EditFile](https://github.com/matcracker/ImageContainer/blob/master/Form_FE_WriteFile.gif)
+![EditFile](https://github.com/matcracker/ImageContainer/blob/master/ServerTools/Form_FE_WriteFile.gif)
 
 ## Cloning
 **Permission:** _st.ui.clone_
