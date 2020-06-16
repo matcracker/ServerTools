@@ -1,3 +1,5 @@
 /.idea
 /libs
-/TODO
+/scripts
+/.php_cs.cache
+TODO

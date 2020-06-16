@@ -1,6 +1,7 @@
+---
 name: ServerTools
 main: matcracker\ServerTools\Main
-version: 0.1.0
+version: 0.2.0
 api: [3.0.0]
 
 load: POSTWORLD
@@ -17,6 +18,13 @@ permissions:
   st.ui.clone:
     description: "Allows to use the cloning function"
     default: op
+  st.ui.plugin-manager:
+    description: "Allows to use the plugin manager function"
+    default: op
+  st.ui.poggit-dowloader:
+    description: "Allows to use the poggit plugin downloader function"
+    default: op
   st.ui.restart:
     description: "Allows to use the restart function"
     default: op
+...
