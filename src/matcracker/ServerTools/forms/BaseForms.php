@@ -29,7 +29,7 @@ use matcracker\FormLib\Form;
 use matcracker\ServerTools\ftp\FTPConnection;
 use matcracker\ServerTools\ftp\SFTPConnection;
 use matcracker\ServerTools\Main;
-use matcracker\ServerTools\Utils;
+use matcracker\ServerTools\utils\Utils;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 use UnexpectedValueException;
@@ -70,12 +70,29 @@ abstract class BaseForms{
 									TextFormat::RED . "The server is missing the following PHP extensions:\n" .
 									"- ftp > for FTP feature\n" .
 									"- openssl > for SFTP feature\n" .
-									"- libssh2 > for SFTP feature\n"
+									"- libssh2 > for SFTP feature\n",
+									self::onClose(self::getMainForm())
 								)
 							);
 						}
 						break;
 					case 2:
+						if(!$player->hasPermission("st.ui.plugin-manager")){
+							$player->sendMessage(Main::formatMessage(TextFormat::RED . "You do not have permission to use this function"));
+
+							return;
+						}
+						$player->sendForm(PluginManagerForm::getMainForm());
+						break;
+					case 3:
+						if(!$player->hasPermission("st.ui.poggit-downloader")){
+							$player->sendMessage(Main::formatMessage(TextFormat::RED . "You do not have permission to use this function"));
+
+							return;
+						}
+						$player->sendForm(PoggitDownloaderForms::getSearchForm());
+						break;
+					case 4:
 						if(!$player->hasPermission("st.ui.restart")){
 							$player->sendMessage(Main::formatMessage(TextFormat::RED . "You do not have permission to use this function"));
 
@@ -92,13 +109,16 @@ abstract class BaseForms{
 		))->setTitle("Server Tools")
 			->addClassicButton("File Explorer")
 			->addClassicButton("Clone Server")
+			->addClassicButton("Plugin Manager")
+			->addClassicButton("Poggit Plugin Downloader")
 			->addClassicButton("Restart Server");
 	}
 
-	public final static function getConfirmForm(string $title, string $message) : Form{
+	public final static function getConfirmForm(string $title, string $message, ?Closure $onClose = null) : Form{
 		return (new Form(
 			static function(Player $player, $data){
-			}
+			},
+			$onClose
 		))->setTitle($title)->setMessage($message);
 	}
 

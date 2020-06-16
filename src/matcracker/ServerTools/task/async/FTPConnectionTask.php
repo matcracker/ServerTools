@@ -21,14 +21,14 @@
 
 declare(strict_types=1);
 
-namespace matcracker\ServerTools\task;
+namespace matcracker\ServerTools\task\async;
 
 use matcracker\ServerTools\forms\BaseForms;
 use matcracker\ServerTools\ftp\FTPBase;
 use matcracker\ServerTools\ftp\FTPConnection;
 use matcracker\ServerTools\ftp\SFTPConnection;
 use matcracker\ServerTools\Main;
-use matcracker\ServerTools\Utils;
+use matcracker\ServerTools\utils\Utils;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
@@ -45,7 +45,7 @@ use function str_repeat;
 use function str_replace;
 use function unserialize;
 
-final class AsyncFTPConnection extends AsyncTask{
+final class FTPConnectionTask extends AsyncTask{
 
 	private const PROGRESSBAR_SIZE = 25;
 

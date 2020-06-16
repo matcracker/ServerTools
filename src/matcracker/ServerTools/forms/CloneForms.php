@@ -29,8 +29,8 @@ use matcracker\ServerTools\ftp\FTPBase;
 use matcracker\ServerTools\ftp\FTPConnection;
 use matcracker\ServerTools\ftp\SFTPConnection;
 use matcracker\ServerTools\Main;
-use matcracker\ServerTools\task\AsyncFTPConnection;
-use matcracker\ServerTools\Utils;
+use matcracker\ServerTools\task\async\FTPConnectionTask;
+use matcracker\ServerTools\utils\Utils;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
@@ -49,7 +49,7 @@ final class CloneForms extends BaseForms{
 				}
 
 				Server::getInstance()->getAsyncPool()->submitTask(
-					new AsyncFTPConnection($ftpConnection, Utils::getServerPath(), self::getFileFilter($data), $player->getName())
+					new FTPConnectionTask($ftpConnection, Utils::getServerPath(), self::getFileFilter($data), $player->getName())
 				);
 			}
 		))->setTitle("Exclude files")

@@ -26,7 +26,7 @@ namespace matcracker\ServerTools\forms;
 use InvalidArgumentException;
 use matcracker\FormLib\Form;
 use matcracker\ServerTools\Main;
-use matcracker\ServerTools\Utils;
+use matcracker\ServerTools\utils\Utils;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\ItemIds;
 use pocketmine\item\WritableBook;
@@ -64,7 +64,7 @@ final class FileExplorerForms extends BaseForms{
 	 *
 	 * NOTE: I decreased the max number because
 	 * the client aligns the text to left.
-	 * By doing so,    it creates some empty whitespaces (~5)
+	 * By doing so, it creates some empty whitespaces (~5)
 	 * and it uses more rows.
 	 */
 	private const BOOK_COL_MAX = 20 - 5;

@@ -45,7 +45,7 @@ final class ServerToolsCommand extends Command implements PluginIdentifiableComm
 		);
 		$this->plugin = $plugin;
 		$this->setPermission("st.command.servertools");
-		$this->setPermissionMessage($this->plugin::formatMessage(TextFormat::RED . "You do not have permission to use this command"));
+		$this->setPermissionMessage(Main::formatMessage(TextFormat::RED . "You do not have permission to use this command"));
 	}
 
 	public function execute(CommandSender $sender, string $commandLabel, array $args) : bool{

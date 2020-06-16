@@ -35,7 +35,7 @@ use function register_shutdown_function;
 final class Main extends PluginBase{
 
 	public function onLoad() : void{
-		UpdateNotifier::checkUpdate($this, $this->getName(), $this->getDescription()->getVersion());
+		UpdateNotifier::checkUpdate($this->getName(), $this->getDescription()->getVersion());
 	}
 
 	public function onEnable() : void{

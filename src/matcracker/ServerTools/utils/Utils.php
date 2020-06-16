@@ -21,8 +21,7 @@
 
 declare(strict_types=1);
 
-namespace matcracker\ServerTools;
-
+namespace matcracker\ServerTools\utils;
 
 use DirectoryIterator;
 use pocketmine\Server;
