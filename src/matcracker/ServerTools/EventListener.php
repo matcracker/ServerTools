@@ -23,9 +23,10 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools;
 
-use matcracker\ServerTools\forms\FileExplorerForms;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerEditBookEvent;
+use pocketmine\item\ItemFactory;
+use pocketmine\item\ItemIds;
 use pocketmine\item\WrittenBook;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\scheduler\ClosureTask;
@@ -76,8 +77,7 @@ final class EventListener implements Listener{
 						function(int $currentTick) use ($player, $bookSlot, $filePath): void{
 							$book = $player->getInventory()->getHotbarSlotItem($bookSlot);
 							if($book instanceof WrittenBook){
-								$book = FileExplorerForms::setupFileBook($book, $filePath);
-								$player->getInventory()->setItem($bookSlot, $book);
+								$player->getInventory()->setItem($bookSlot, ItemFactory::get(ItemIds::AIR));
 							}
 						}
 					), 1
@@ -87,5 +87,4 @@ final class EventListener implements Listener{
 			}
 		}
 	}
-
 }
