@@ -74,10 +74,12 @@ final class EventListener implements Listener{
 				//Remove the book from the hotbar
 				$this->plugin->getScheduler()->scheduleDelayedTask(
 					new ClosureTask(
-						function(int $currentTick) use ($player, $bookSlot, $filePath): void{
-							$book = $player->getInventory()->getHotbarSlotItem($bookSlot);
-							if($book instanceof WrittenBook){
-								$player->getInventory()->setItem($bookSlot, ItemFactory::get(ItemIds::AIR));
+						function(int $currentTick) use ($player, $bookSlot): void{
+							if($player !== null){
+								$book = $player->getInventory()->getHotbarSlotItem($bookSlot);
+								if($book instanceof WrittenBook){
+									$player->getInventory()->setItem($bookSlot, ItemFactory::get(ItemIds::AIR));
+								}
 							}
 						}
 					), 1

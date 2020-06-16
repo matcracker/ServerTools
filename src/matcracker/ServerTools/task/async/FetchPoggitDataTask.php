@@ -78,27 +78,15 @@ final class FetchPoggitDataTask extends AsyncTask{
 		if($player === null){
 			return;
 		}
-		/** @var PluginInfo[] $pluginInfo */
-		if(($pluginInfo = $this->getResult()) === null){
+		/** @var PluginInfo[]|null $pluginInfo */
+		$pluginInfo = $this->getResult();
+		if($pluginInfo === null || count($pluginInfo) === 0){
 			$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not connect to Poggit."));
 
 			return;
 		}
 
 		PoggitDownloaderForms::$pluginInfoCache[$this->playerName] = $pluginInfo;
-
-		if(count($pluginInfo) === 0){
-			$player->sendForm(PoggitDownloaderForms::getSearchForm($this->pluginName));
-
-			return;
-		}
-
-		/*$versions = [];
-		foreach($poggitData as $index => $data){
-			$versions[$index] = $data["version"];
-			/*$artifactUrl = $data["artifact_url"];
-			$api = $data["api"][0]["from"] . " - " . $data["api"][0]["to"];
-		}*/
 
 		$player->sendForm(PoggitDownloaderForms::showPluginInfo($this->playerName));
 	}

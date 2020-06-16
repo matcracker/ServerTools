@@ -82,20 +82,15 @@ final class SearchPoggitPluginTask extends AsyncTask{
 		if($player === null){
 			return;
 		}
-		/** @var string[][] $results */
-		if(($results = $this->getResult()) === null){
+		/** @var string[][]|null $results */
+		$results = $this->getResult();
+		if($results === null || count($results) === 0){
 			$player->sendForm(PoggitDownloaderForms::getSearchForm($this->pluginToSearch));
 
 			return;
 		}
 
 		PoggitDownloaderForms::$pluginResultsCache = $results;
-
-		if(count($results) === 0){
-			$player->sendForm(PoggitDownloaderForms::getSearchForm($this->pluginToSearch));
-
-			return;
-		}
 
 		$player->sendForm(PoggitDownloaderForms::showSearchResults());
 	}
