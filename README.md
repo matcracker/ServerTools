@@ -8,6 +8,8 @@ ServerTools is Pocketmine-MP plugin containing a set of tools that allows you to
 ## Features
 - File Explorer
 - Cloning
+- Plugin Manager
+- Poggit Plugin Downloader
 - Restart Server
 
 **Menu UI example:**
@@ -15,10 +17,10 @@ ServerTools is Pocketmine-MP plugin containing a set of tools that allows you to
 ![Main_Menu](https://github.com/matcracker/ServerTools/blob/master/.github/README_IMAGES/Form_Main.png)
 
 ## Commands
-- **/servertools** (or alias: **/st**) - _The main command of plugin_ (**Permission:** _st.command.servertools_)
+- **/servertools** (or alias: **/st**) - _The main command of plugin_ (**Permission (default OP):** _st.command.servertools_)
 
 ## File Explorer
-**Permission:** _st.ui.file-explorer_
+**Permission (default OP):** _st.ui.file-explorer_
 
 It allows to explore and edit your server folder and files.
 
@@ -31,7 +33,7 @@ It allows to explore and edit your server folder and files.
 ![EditFile](https://github.com/matcracker/ImageContainer/blob/master/ServerTools/Form_FE_WriteFile.gif)
 
 ## Cloning
-**Permission:** _st.ui.clone_
+**Permission (default OP):** _st.ui.clone_
 
 It allows to clone your server using **FTP** (also available with SSL) or **SFTP** protocols.
 
@@ -51,6 +53,25 @@ It allows to clone your server using **FTP** (also available with SSL) or **SFTP
 
 4. Wait until the process is finished.<br/>
 ![Progress](https://github.com/matcracker/ServerTools/blob/master/.github/README_IMAGES/Form_Clone_Progress.png)
+
+## Plugin Manager
+**Permission (default OP):** _st.ui.plugin-manager_
+
+![PluginManager](https://github.com/matcracker/ServerTools/blob/master/.github/README_IMAGES/Form_PluginManager.png)
+
+It allows to:
+- Enable/Disable plugins<br/>
+![EnableDisablePlugin](https://github.com/matcracker/ServerTools/blob/master/.github/README_IMAGES/Form_PluginManager_EnDisPlugins.png)
+
+- Load a plugin from file (.phar)<br/>
+![LoadPharPlugin](https://github.com/matcracker/ServerTools/blob/master/.github/README_IMAGES/Form_PluginManager_LoadPlugin.png)
+
+## Poggit Plugin Downloader
+**Permission (default OP):** _st.ui.poggit-downloader_
+
+It allows to search and download to your server a plugin from poggit website.
+
+![PoggitDownloader](https://github.com/matcracker/ImageContainer/blob/master/ServerTools/Form_PoggitDownloader.gif)
 
 ## Restart Server
 **NOT WORKING ON WINDOWS OPERATING SYSTEM!**
