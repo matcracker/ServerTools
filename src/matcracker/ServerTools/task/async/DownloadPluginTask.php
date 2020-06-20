@@ -31,8 +31,9 @@ use pocketmine\utils\TextFormat;
 use function basename;
 use function file_get_contents;
 use function file_put_contents;
+use function is_string;
 
-final class DownloadPoggitPluginTask extends AsyncTask{
+final class DownloadPluginTask extends AsyncTask{
 
 	/** @var string */
 	private $playerName;
@@ -48,12 +49,18 @@ final class DownloadPoggitPluginTask extends AsyncTask{
 	}
 
 	public function onRun() : void{
-		$fileName = basename($this->pluginInfo->getDownloadLink());
-		$path = $this->pluginPath . $fileName;
-
-		if(file_put_contents($path, file_get_contents($this->pluginInfo->getDownloadLink()))){
-			$this->setResult(true);
+		$link = $this->pluginInfo->getDownloadLink();
+		$data = file_get_contents($link);
+		if(!is_string($data)){
+			return;
 		}
+		$path = $this->pluginPath . basename($link);
+
+		if(file_put_contents($path, $data) === false){
+			return;
+		}
+
+		$this->setResult(true);
 	}
 
 	public function onCompletion(Server $server) : void{

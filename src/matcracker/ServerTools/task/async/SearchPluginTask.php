@@ -23,52 +23,57 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\task\async;
 
-use matcracker\ServerTools\forms\PoggitDownloaderForms;
-use matcracker\ServerTools\Main;
-use matcracker\ServerTools\utils\PluginInfo;
+use matcracker\ServerTools\forms\plugins\downloader\SearchPluginForm;
+use matcracker\ServerTools\forms\plugins\downloader\SearchResultsForm;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use pocketmine\utils\Internet;
-use pocketmine\utils\TextFormat;
 use function count;
-use function implode;
+use function mb_strtolower;
+use function strlen;
+use function strpos;
 
-final class FetchPoggitDataTask extends AsyncTask{
+final class SearchPluginTask extends AsyncTask{
 
-	private const POGGIT_RELEASES_URL = "https://poggit.pmmp.io/releases.min.json?name=";
+	private const POGGIT_RELEASES_URL = "https://poggit.pmmp.io/releases.min.json";
 	/** @var string */
-	private $pluginName;
+	private $pluginToSearch;
 	/** @var string */
 	private $playerName;
 
-	public function __construct(string $pluginName, string $playerName){
-		$this->pluginName = $pluginName;
+	public function __construct(string $pluginToSearch, string $playerName){
+		$this->pluginToSearch = $pluginToSearch;
 		$this->playerName = $playerName;
 	}
 
 	public function onRun() : void{
-		$json = Internet::getURL(self::POGGIT_RELEASES_URL . $this->pluginName);
+		$json = Internet::getURL(self::POGGIT_RELEASES_URL);
 
 		if($json !== false){
 			$poggitJson = json_decode($json, true);
 			if(is_array($poggitJson)){
-				$pluginInfo = [];
-
+				$results = [];
 				foreach($poggitJson as $jsonData){
-					$pluginInfo[] = new PluginInfo(
-						$jsonData["name"],
-						implode(", ", $jsonData["producers"]["Collaborator"] ?? ["Unknown"]),
-						$jsonData["version"],
-						$jsonData["api"][0]["from"],
-						$jsonData["api"][0]["to"],
-						$jsonData["artifact_url"],
-						$jsonData["icon_url"] ?? "",
-						$jsonData["tagline"],
-						$jsonData["license"]
-					);
+					$exist = false;
+					$name = $jsonData["name"];
+					foreach($results as $result){
+						if($result["name"] === $name){
+							$exist = true;
+							break;
+						}
+					}
+
+					if(!$exist &&
+						(strlen($this->pluginToSearch) === 0 || strpos(mb_strtolower($name), mb_strtolower($this->pluginToSearch)) !== false)
+					){
+						$results[] = [
+							"name" => $name,
+							"url" => $jsonData["icon_url"] ?? ""
+						];
+					}
 				}
 
-				$this->setResult($pluginInfo);
+				$this->setResult($results);
 			}
 		}
 	}
@@ -78,16 +83,14 @@ final class FetchPoggitDataTask extends AsyncTask{
 		if($player === null){
 			return;
 		}
-		/** @var PluginInfo[]|null $pluginInfo */
-		$pluginInfo = $this->getResult();
-		if($pluginInfo === null || count($pluginInfo) === 0){
-			$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not connect to Poggit."));
+		/** @var string[][]|null $results */
+		$results = $this->getResult();
+		if($results === null || count($results) === 0){
+			$player->sendForm(new SearchPluginForm($this->pluginToSearch));
 
 			return;
 		}
 
-		PoggitDownloaderForms::$pluginInfoCache[$this->playerName] = $pluginInfo;
-
-		$player->sendForm(PoggitDownloaderForms::showPluginInfo($this->playerName));
+		$player->sendForm(new SearchResultsForm($results));
 	}
 }

@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\commands;
 
-use matcracker\ServerTools\forms\BaseForms;
 use matcracker\ServerTools\Main;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
@@ -34,6 +33,7 @@ use pocketmine\utils\TextFormat;
 
 final class ServerToolsCommand extends Command implements PluginIdentifiableCommand{
 
+	/** @var Main */
 	private $plugin;
 
 	public function __construct(Main $plugin){
@@ -59,11 +59,14 @@ final class ServerToolsCommand extends Command implements PluginIdentifiableComm
 			return false;
 		}
 
-		$sender->sendForm(BaseForms::getMainForm());
+		$sender->sendForm($this->plugin->getFormManager()->getMainMenu());
 
 		return true;
 	}
 
+	/**
+	 * @return Main
+	 */
 	public function getPlugin() : Plugin{
 		return $this->plugin;
 	}

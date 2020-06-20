@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\task\async;
 
-use matcracker\ServerTools\forms\BaseForms;
+use matcracker\ServerTools\forms\FormManager;
 use matcracker\ServerTools\ftp\FTPBase;
 use matcracker\ServerTools\ftp\FTPConnection;
 use matcracker\ServerTools\ftp\SFTPConnection;
@@ -164,7 +164,7 @@ final class FTPConnectionTask extends AsyncTask{
 			}
 		}elseif(is_array($result)){
 			if(count($result) > 0){
-				$player->sendForm(BaseForms::getConfirmForm("Not uploaded files", TextFormat::RED . "- " . implode("\n- ", $result)));
+				$player->sendForm(FormManager::getConfirmForm("Not uploaded files", TextFormat::RED . "- " . implode("\n- ", $result)));
 			}else{
 				$player->sendMessage(Main::formatMessage(TextFormat::GREEN . "Cloning process has been completed."));
 			}
