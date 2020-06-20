@@ -21,7 +21,7 @@ permissions:
   st.ui.plugin-manager:
     description: "Allows to use the plugin manager function"
     default: op
-  st.ui.poggit-dowloader:
+  st.ui.poggit-downloader:
     description: "Allows to use the poggit plugin downloader function"
     default: op
   st.ui.restart:
