@@ -29,20 +29,25 @@ use matcracker\ServerTools\task\async\FTPConnectionTask;
 use matcracker\ServerTools\utils\Utils;
 use pocketmine\Player;
 use pocketmine\Server;
-use UnexpectedValueException;
-use function is_array;
+use function is_string;
 
 final class ExcludeFilesForm extends CustomForm{
 
 	public function __construct(FTPBase $ftpConnection){
 		parent::__construct(
 			static function(Player $player, $data) use ($ftpConnection){
-				if(!is_array($data)){
-					throw new UnexpectedValueException("Unexpected value parsed from Form.");
+				/** @var string[] $filter */
+				$filter = [];
+
+				/** @var bool $flag */
+				foreach($data as $file => $flag){
+					if(is_string($file) && $flag){
+						$filter[] = $file;
+					}
 				}
 
 				Server::getInstance()->getAsyncPool()->submitTask(
-					new FTPConnectionTask($ftpConnection, Utils::getServerPath(), $this->getFileFilter($data), $player->getName())
+					new FTPConnectionTask($ftpConnection, Utils::getServerPath(), $filter, $player->getName())
 				);
 			}
 		);
@@ -50,64 +55,17 @@ final class ExcludeFilesForm extends CustomForm{
 		$this->setTitle("Exclude files")
 			->addLabel("Do you want to exclude something from the clone?")
 			->addLabel("Server Folders")
-			->addToggle("Players Data") //2
-			->addToggle("Plugins") //3
-			->addToggle("Plugins Data") //4
-			->addToggle("Resource Packs") //5
-			->addToggle("Worlds") //6
+			->addToggle("Players Data", null, "players")
+			->addToggle("Plugins", null, "plugins")
+			->addToggle("Plugins Data", null, "plugins_data")
+			->addToggle("Resource Packs", null, "resource_packs")
+			->addToggle("Worlds", null, "worlds")
 			->addLabel("Server Files")
-			->addToggle("Banned Players") //8
-			->addToggle("Operators (OP)") //9
-			->addToggle("Configuration") //10
-			->addToggle("Logs") //11
-			->addToggle("Properties") //12
-			->addToggle("White-list"); //13
+			->addToggle("Banned Players", null, "banned-players.txt,banned-ips.txt")
+			->addToggle("Operators (OP)", null, "ops.txt")
+			->addToggle("Configuration", null, "pocketmine.yml")
+			->addToggle("Logs", null, "server.log")
+			->addToggle("Properties", null, "server.properties")
+			->addToggle("White-list", null, "white-list.txt");
 	}
-
-	/**
-	 * @param bool[] $data
-	 *
-	 * @return string[]
-	 */
-	private function getFileFilter(array $data) : array{
-		$filter = [];
-
-		if($data[2]){
-			$filter[] = "players";
-		}
-		if($data[3]){
-			$filter[] = "plugins";
-		}
-		if($data[4]){
-			$filter[] = "plugin_data";
-		}
-		if($data[5]){
-			$filter[] = "resource_packs";
-		}
-		if($data[6]){
-			$filter[] = "worlds";
-		}
-		if($data[8]){
-			$filter[] = "banned-players.txt";
-			$filter[] = "banned-ips.txt";
-		}
-		if($data[9]){
-			$filter[] = "ops.txt";
-		}
-		if($data[10]){
-			$filter[] = "pocketmine.yml";
-		}
-		if($data[11]){
-			$filter[] = "server.log";
-		}
-		if($data[12]){
-			$filter[] = "server.properties";
-		}
-		if($data[13]){
-			$filter[] = "white-list.txt";
-		}
-
-		return $filter;
-	}
-
 }
