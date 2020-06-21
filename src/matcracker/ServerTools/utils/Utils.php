@@ -30,10 +30,14 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
 use function file_exists;
+use function glob;
 use function in_array;
+use function is_file;
 use function mb_substr;
+use function rmdir;
 use function round;
 use function str_replace;
+use function unlink;
 
 final class Utils{
 
@@ -90,6 +94,20 @@ final class Utils{
 		}
 
 		return $fileList;
+	}
+
+	public static function removeAllFiles(string $path) : void{
+		$fileList = glob("{$path}/*");
+		if($fileList !== false){
+			foreach($fileList as $file){
+				if(is_file($file)){
+					unlink($file);
+				}else{
+					self::removeAllFiles($file);
+				}
+			}
+			rmdir($path);
+		}
 	}
 
 	public static function getServerPath() : string{

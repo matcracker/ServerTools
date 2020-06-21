@@ -35,6 +35,7 @@ use pocketmine\item\WrittenBook;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\Player;
+use pocketmine\plugin\PluginException;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use function basename;
@@ -49,7 +50,6 @@ use function is_writable;
 use function str_repeat;
 use function str_replace;
 use function strlen;
-use function unlink;
 
 final class FileEditorForm extends Form{
 	/**
@@ -74,9 +74,14 @@ final class FileEditorForm extends Form{
 	 */
 	private const BOOK_MAX_SIZE = self::BOOK_ROW_MAX * self::BOOK_COL_MAX * self::BOOK_PAGES_MAX;
 
+	private const READ_FILE = "/read_file";
+	private const EDIT_FILE = "/edit_file";
+	private const RENAME_FILE = "/rename_file";
+	private const DELETE_FILE = "/delete_file";
+
 	public function __construct(string $filePath){
 		if(is_dir($filePath)){
-			throw new InvalidArgumentException("The file path must be a file not a directory.");
+			throw new PluginException("The {$filePath} must be a file.");
 		}
 
 		$fileName = basename($filePath);
@@ -88,61 +93,59 @@ final class FileEditorForm extends Form{
 					return;
 				}
 
-				if($data === "delete"){
-					if(unlink($filePath)){
-						$player->sendMessage(Main::formatMessage(TextFormat::GREEN . "The file \"{$fileName}\" has been deleted."));
-					}else{
-						$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not delete \"{$fileName}\"."));
-					}
+				if($data === self::DELETE_FILE){
+					$player->sendForm(new DeleteFileForm($filePath));
 
-					return;
-				}
+				}elseif($data === self::RENAME_FILE){
+					$player->sendForm(new RenameFileForm($filePath));
 
-				/**@var WrittenBook $book */
-				$book = ItemFactory::get(ItemIds::WRITTEN_BOOK);
-
-				if($data === "edit"){
-					/**@var WritableBook $book */
-					$book = ItemFactory::get(ItemIds::WRITABLE_BOOK);
-				}
-
-				$book = self::setupFileBook($book, $filePath);
-
-				if($fileResource = fopen($filePath, "r")){
-					$pageCount = 0;
-					$pageContent = "";
-
-					while(($buff = fgets($fileResource)) !== false){
-						$line = str_replace("\r", "", $buff);
-						$line = str_replace("\t", str_repeat(" ", 4), $line);
-
-						if(strlen($pageContent) > self::BOOK_ROW_MAX * self::BOOK_COL_MAX){
-							$book->setPageText($pageCount, $pageContent);
-
-							$pageContent = $line;
-							$pageCount++;
-
-							if($pageCount >= 50){
-								break;
-							}
-						}else{
-							$pageContent .= $line;
-						}
-					}
-
-					if(!fclose($fileResource)){
-						$player->sendMessage(Main::formatMessage(TextFormat::RED . "Cannot close the file stream of {$fileName}"));
-
-						return;
-					}
-
-					if($pageCount < 50){
-						$book->setPageText($pageCount, $pageContent);
-					}
-
-					$player->getInventory()->setItemInHand($book);
 				}else{
-					$player->sendMessage(Main::formatMessage(TextFormat::RED . "Cannot open the file stream of {$fileName}"));
+					/**@var WrittenBook $book */
+					$book = ItemFactory::get(ItemIds::WRITTEN_BOOK);
+
+					if($data === self::EDIT_FILE){
+						/**@var WritableBook $book */
+						$book = ItemFactory::get(ItemIds::WRITABLE_BOOK);
+					}
+
+					$book = self::setupFileBook($book, $filePath);
+
+					if($fileResource = fopen($filePath, "r")){
+						$pageCount = 0;
+						$pageContent = "";
+
+						while(($buff = fgets($fileResource)) !== false){
+							$line = str_replace("\r", "", $buff);
+							$line = str_replace("\t", str_repeat(" ", 4), $line);
+
+							if(strlen($pageContent) > self::BOOK_ROW_MAX * self::BOOK_COL_MAX){
+								$book->setPageText($pageCount, $pageContent);
+
+								$pageContent = $line;
+								$pageCount++;
+
+								if($pageCount >= 50){
+									break;
+								}
+							}else{
+								$pageContent .= $line;
+							}
+						}
+
+						if(!fclose($fileResource)){
+							$player->sendMessage(Main::formatMessage(TextFormat::RED . "Cannot close the file stream of {$fileName}"));
+
+							return;
+						}
+
+						if($pageCount < 50){
+							$book->setPageText($pageCount, $pageContent);
+						}
+
+						$player->getInventory()->setItemInHand($book);
+					}else{
+						$player->sendMessage(Main::formatMessage(TextFormat::RED . "Cannot open the file stream of {$fileName}"));
+					}
 				}
 			},
 			FormManager::onClose(new FileExplorerForm(dirname($filePath)))
@@ -167,12 +170,12 @@ final class FileEditorForm extends Form{
 			"Size: " . Utils::bytesToHuman(filesize($filePath));
 
 		$this->setMessage($fileInfoMessage)
-			->addLocalImageButton("Rename", "textures/ui/pencil_edit_icon.png", "/rename")
-			->addLocalImageButton("Delete", "textures/ui/cancel.png", "/delete")
-			->addLocalImageButton("Read", "textures/items/book_normal.png", "/read");
+			->addLocalImageButton("Rename", "textures/ui/pencil_edit_icon.png", self::RENAME_FILE)
+			->addLocalImageButton("Delete", "textures/ui/trash.png", self::DELETE_FILE)
+			->addLocalImageButton("Read", "textures/items/book_normal.png", self::READ_FILE);
 
 		if(is_writable($filePath)){
-			$this->addLocalImageButton("Edit", "textures/items/book_writable.png", "/edit");
+			$this->addLocalImageButton("Edit", "textures/ui/text_color_paintbrush.png", self::EDIT_FILE);
 		}
 	}
 

@@ -36,6 +36,14 @@ use function stream_copy_to_stream;
 
 final class SFTPConnection extends FTPBase{
 
+	public static function hasExtension() : bool{
+		return extension_loaded("openssl") && extension_loaded("ssh2");
+	}
+
+	public static function getProtocolName() : string{
+		return "SFTP";
+	}
+
 	/**
 	 * @return int|resource
 	 */
@@ -86,13 +94,5 @@ final class SFTPConnection extends FTPBase{
 	 */
 	public function disconnect($connection) : bool{
 		return @ssh2_disconnect($connection);
-	}
-
-	public static function hasExtension() : bool{
-		return extension_loaded("openssl") && extension_loaded("ssh2");
-	}
-
-	public static function getProtocolName() : string{
-		return "SFTP";
 	}
 }

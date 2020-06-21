@@ -27,6 +27,7 @@ use matcracker\FormLib\Form;
 use matcracker\ServerTools\forms\FormManager;
 use matcracker\ServerTools\utils\Utils;
 use pocketmine\Player;
+use pocketmine\plugin\PluginException;
 use pocketmine\utils\TextFormat;
 use function count;
 use function dirname;
@@ -35,13 +36,30 @@ use const DIRECTORY_SEPARATOR;
 
 final class FileExplorerForm extends Form{
 
+	public const NEW_FILE = "/new_file";
+	private const NEW_FOLDER = "/new_folder";
+	private const RENAME_FOLDER = "/rename_folder";
+	private const DELETE_FOLDER = "/delete_folder";
+
 	public function __construct(string $filePath){
+		if(!is_dir($filePath)){
+			throw new PluginException("The {$filePath} must be a folder.");
+		}
+
 		$fileList = Utils::getSortedFileList($filePath);
 
 		parent::__construct(
 			static function(Player $player, $data) use ($filePath, $fileList){
 				if($data === FormManager::BACK_LABEL){
 					$form = new self(dirname($filePath, 1));
+				}elseif($data === self::NEW_FOLDER){
+					$form = new NewFolderForm($filePath);
+				}elseif($data === self::NEW_FILE){
+					$form = new NewFileForm($filePath);
+				}elseif($data === self::DELETE_FOLDER){
+					$form = new DeleteFolderForm($filePath);
+				}elseif($data === self::RENAME_FOLDER){
+					$form = new RenameFolderForm($filePath);
 				}else{
 					$nextPath = $filePath . DIRECTORY_SEPARATOR . $data;
 					if(is_dir($nextPath)){
@@ -67,12 +85,12 @@ final class FileExplorerForm extends Form{
 
 		if($filePath !== Utils::getServerPath()){
 			$this->addLocalImageButton("Back", "textures/ui/arrow_dark_left_stretch.png", FormManager::BACK_LABEL)
-				->addLocalImageButton("Rename current folder", "textures/ui/pencil_edit_icon.png", "rename")
-				->addLocalImageButton("Delete current folder", "textures/ui/cancel.png", "delete");
+				->addLocalImageButton("Rename current folder", "textures/ui/pencil_edit_icon.png", self::RENAME_FOLDER)
+				->addLocalImageButton("Delete current folder", "textures/ui/trash.png", self::DELETE_FOLDER);
 		}
 
-		$this->addLocalImageButton("New folder", "", "/new_folder")
-			->addLocalImageButton("New file", "", "/new_file");
+		$this->addLocalImageButton("New folder", "textures/ui/book_addpicture_default.png", self::NEW_FOLDER)
+			->addLocalImageButton("New file", "textures/ui/book_addtextpage_default.png", self::NEW_FILE);
 
 		if(count($fileList) === 0){
 			$this->setMessage($filePath . TextFormat::EOL . TextFormat::BOLD . TextFormat::GOLD . " (Empty Folder)");

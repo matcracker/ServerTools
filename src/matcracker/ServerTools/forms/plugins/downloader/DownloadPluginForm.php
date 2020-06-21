@@ -58,7 +58,7 @@ final class DownloadPluginForm extends CustomForm{
 		$serverApi = Server::getInstance()->getApiVersion();
 
 		parent::__construct(
-			function(Player $player, $data) use($pluginsInfo) : void{
+			function(Player $player, $data) use ($pluginsInfo) : void{
 				$pluginInfo = $pluginsInfo[$player->getName()][$data[3]];
 
 				$server = Server::getInstance();

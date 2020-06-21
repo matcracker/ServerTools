@@ -47,10 +47,6 @@ final class FormManager{
 		return self::$instance;
 	}
 
-	public function getMainMenu() : Form{
-		return new MainMenuForm($this->plugin);
-	}
-
 	final public static function getConfirmForm(string $title, string $message, ?Closure $onClose = null) : Form{
 		return (new Form(
 			static function(Player $player, $data){
@@ -73,5 +69,9 @@ final class FormManager{
 		return static function(Player $player) use ($form){
 			$player->sendForm($form);
 		};
+	}
+
+	public function getMainMenu() : Form{
+		return new MainMenuForm($this->plugin);
 	}
 }

@@ -36,7 +36,7 @@ final class BaseFTPForm extends CustomForm{
 
 	public function __construct(string $title){
 		parent::__construct(
-			static function(Player $player, $data): void{
+			static function(Player $player, $data) : void{
 				$host = (string) $data["host"];
 
 				if(!is_numeric($data["port"])){

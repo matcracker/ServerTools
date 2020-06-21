@@ -41,6 +41,14 @@ final class FTPConnection extends FTPBase{
 		$this->ssl = $ssl;
 	}
 
+	public static function hasExtension() : bool{
+		return extension_loaded("ftp");
+	}
+
+	public static function getProtocolName() : string{
+		return "FTP";
+	}
+
 	/**
 	 * @return int|resource
 	 */
@@ -81,13 +89,5 @@ final class FTPConnection extends FTPBase{
 	 */
 	public function disconnect($connection) : bool{
 		return ftp_close($connection);
-	}
-
-	public static function hasExtension() : bool{
-		return extension_loaded("ftp");
-	}
-
-	public static function getProtocolName() : string{
-		return "FTP";
 	}
 }

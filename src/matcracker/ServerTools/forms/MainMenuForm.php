@@ -39,7 +39,7 @@ final class MainMenuForm extends Form{
 
 	public function __construct(Main $plugin){
 		parent::__construct(
-			function(Player $player, $data) use ($plugin): void{
+			function(Player $player, $data) : void{
 				if(!$player->hasPermission("st.ui.{$data}")){
 					$player->sendMessage(Main::formatMessage(TextFormat::RED . "You do not have permission to use this function"));
 

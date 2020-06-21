@@ -46,6 +46,10 @@ abstract class FTPBase{
 		$this->remoteHomePath = $remoteHomePath;
 	}
 
+	public abstract static function hasExtension() : bool;
+
+	public abstract static function getProtocolName() : string;
+
 	public abstract function connect();
 
 	/**
@@ -58,10 +62,6 @@ abstract class FTPBase{
 	public abstract function putFile($connection, string $localFile, string $remoteFile, int $mode = 0644) : bool;
 
 	public abstract function putDirectory($connection, string $remotePath, int $mode = 0644) : bool;
-
-	public abstract static function hasExtension() : bool;
-
-	public abstract static function getProtocolName() : string;
 
 	/**
 	 * @return string

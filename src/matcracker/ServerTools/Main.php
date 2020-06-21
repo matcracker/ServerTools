@@ -39,22 +39,6 @@ final class Main extends PluginBase{
 	/** @var FormManager */
 	private $formManager;
 
-	public function onLoad() : void{
-		UpdateNotifier::checkUpdate($this->getName(), $this->getDescription()->getVersion());
-	}
-
-	public function onEnable() : void{
-		@mkdir($this->getDataFolder());
-
-		$this->getServer()->getCommandMap()->register('servertools', new ServerToolsCommand($this));
-		$this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
-		$this->formManager = new FormManager($this);
-	}
-
-	public function getFormManager() : FormManager{
-		return $this->formManager;
-	}
-
 	public static function restartServer(Server $server) : bool{
 		if(Utils::getOS() !== "win"){
 			if(!is_executable("start.sh")){
@@ -75,6 +59,22 @@ final class Main extends PluginBase{
 
 	public static function formatMessage(string $message) : string{
 		return TextFormat::AQUA . "[ServerTools] " . TextFormat::RESET . $message;
+	}
+
+	public function onLoad() : void{
+		UpdateNotifier::checkUpdate($this->getName(), $this->getDescription()->getVersion());
+	}
+
+	public function onEnable() : void{
+		@mkdir($this->getDataFolder());
+
+		$this->getServer()->getCommandMap()->register('servertools', new ServerToolsCommand($this));
+		$this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
+		$this->formManager = new FormManager($this);
+	}
+
+	public function getFormManager() : FormManager{
+		return $this->formManager;
 	}
 
 }
