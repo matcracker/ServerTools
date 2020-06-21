@@ -36,7 +36,7 @@ final class CloneForm extends Form{
 
 	public function __construct(){
 		parent::__construct(
-			static function(Player $player, $data) : void{
+			function(Player $player, $data) : void{
 				if(!is_int($data)){
 					throw new UnexpectedValueException("Unexpected value parsed from Form.");
 				}

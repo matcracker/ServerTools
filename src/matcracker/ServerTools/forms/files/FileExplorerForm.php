@@ -49,7 +49,7 @@ final class FileExplorerForm extends Form{
 		$fileList = Utils::getSortedFileList($filePath);
 
 		parent::__construct(
-			static function(Player $player, $data) use ($filePath, $fileList){
+			static function(Player $player, $data) use ($filePath){
 				if($data === FormManager::BACK_LABEL){
 					$form = new self(dirname($filePath, 1));
 				}elseif($data === self::NEW_FOLDER){
