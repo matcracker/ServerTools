@@ -16,7 +16,7 @@ use function is_dir;
 
 final class DeleteFolderForm extends ModalForm{
 
-	public function __construct(string $folderPath){
+	public function __construct(string $folderPath, Player $player){
 		if(!is_dir($folderPath)){
 			throw new PluginException("The {$folderPath} must be a folder.");
 		}
@@ -29,13 +29,13 @@ final class DeleteFolderForm extends ModalForm{
 
 						return;
 					}
-					$form = new FileExplorerForm(dirname($folderPath, 1));
+					$form = new FileExplorerForm(dirname($folderPath, 1), $player);
 				}else{
-					$form = new FileExplorerForm($folderPath);
+					$form = new FileExplorerForm($folderPath, $player);
 				}
 				$player->sendForm($form);
 			},
-			FormManager::onClose(new FileExplorerForm($folderPath))
+			FormManager::onClose(new FileExplorerForm($folderPath, $player))
 		);
 		$this->setTitle("Confirm to delete folder.")
 			->setMessage("Are you sure to delete the folder {$folderPath} and all its contents?")

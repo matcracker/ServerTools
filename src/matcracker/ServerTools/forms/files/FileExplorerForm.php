@@ -41,7 +41,7 @@ final class FileExplorerForm extends Form{
 	private const RENAME_FOLDER = "/rename_folder";
 	private const DELETE_FOLDER = "/delete_folder";
 
-	public function __construct(string $filePath){
+	public function __construct(string $filePath, Player $player){
 		if(!is_dir($filePath)){
 			throw new PluginException("The {$filePath} must be a folder.");
 		}
@@ -51,21 +51,21 @@ final class FileExplorerForm extends Form{
 		parent::__construct(
 			static function(Player $player, $data) use ($filePath){
 				if($data === FormManager::BACK_LABEL){
-					$form = new self(dirname($filePath, 1));
+					$form = new self(dirname($filePath, 1), $player);
 				}elseif($data === self::NEW_FOLDER){
-					$form = new NewFolderForm($filePath);
+					$form = new NewFolderForm($filePath, $player);
 				}elseif($data === self::NEW_FILE){
-					$form = new NewFileForm($filePath);
+					$form = new NewFileForm($filePath, $player);
 				}elseif($data === self::DELETE_FOLDER){
-					$form = new DeleteFolderForm($filePath);
+					$form = new DeleteFolderForm($filePath, $player);
 				}elseif($data === self::RENAME_FOLDER){
-					$form = new RenameFolderForm($filePath);
+					$form = new RenameFolderForm($filePath, $player);
 				}else{
 					$nextPath = $filePath . DIRECTORY_SEPARATOR . $data;
 					if(is_dir($nextPath)){
-						$form = new self($nextPath);
+						$form = new self($nextPath, $player);
 					}else{
-						$form = new FileEditorForm($nextPath);
+						$form = new FileEditorForm($nextPath, $player);
 					}
 				}
 
@@ -83,14 +83,20 @@ final class FileExplorerForm extends Form{
 			return;
 		}
 
+		$hasPermission = $player->hasPermission("st.ui.file-explorer.write");
 		if($filePath !== Utils::getServerPath()){
-			$this->addLocalImageButton("Back", "textures/ui/arrow_dark_left_stretch.png", FormManager::BACK_LABEL)
-				->addLocalImageButton("Rename current folder", "textures/ui/pencil_edit_icon.png", self::RENAME_FOLDER)
-				->addLocalImageButton("Delete current folder", "textures/ui/trash.png", self::DELETE_FOLDER);
+			$this->addLocalImageButton("Back", "textures/ui/arrow_dark_left_stretch.png", FormManager::BACK_LABEL);
+
+			if($hasPermission){
+				$this->addLocalImageButton("Rename current folder", "textures/ui/pencil_edit_icon.png", self::RENAME_FOLDER)
+					->addLocalImageButton("Delete current folder", "textures/ui/trash.png", self::DELETE_FOLDER);
+			}
 		}
 
-		$this->addLocalImageButton("New folder", "textures/ui/book_addpicture_default.png", self::NEW_FOLDER)
-			->addLocalImageButton("New file", "textures/ui/book_addtextpage_default.png", self::NEW_FILE);
+		if($hasPermission){
+			$this->addLocalImageButton("New folder", "textures/ui/book_addpicture_default.png", self::NEW_FOLDER)
+				->addLocalImageButton("New file", "textures/ui/book_addtextpage_default.png", self::NEW_FILE);
+		}
 
 		if(count($fileList) === 0){
 			$this->setMessage($filePath . TextFormat::EOL . TextFormat::BOLD . TextFormat::GOLD . " (Empty Folder)");

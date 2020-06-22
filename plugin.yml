@@ -15,6 +15,10 @@ permissions:
   st.ui.file-explorer:
     description: "Allows to use the file explorer function"
     default: op
+    children:
+      st.ui.file-explorer.write:
+        description: "Give the permission to create/edit files and folders."
+        default: false
   st.ui.clone:
     description: "Allows to use the cloning function"
     default: op

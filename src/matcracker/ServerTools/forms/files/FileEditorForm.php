@@ -80,7 +80,7 @@ final class FileEditorForm extends Form{
 	private const RENAME_FILE = "/rename_file";
 	private const DELETE_FILE = "/delete_file";
 
-	public function __construct(string $filePath){
+	public function __construct(string $filePath, Player $player){
 		if(!is_file($filePath)){
 			throw new PluginException("The {$filePath} must be a file.");
 		}
@@ -95,10 +95,10 @@ final class FileEditorForm extends Form{
 				}
 
 				if($data === self::DELETE_FILE){
-					$player->sendForm(new DeleteFileForm($filePath));
+					$player->sendForm(new DeleteFileForm($filePath, $player));
 
 				}elseif($data === self::RENAME_FILE){
-					$player->sendForm(new RenameFileForm($filePath));
+					$player->sendForm(new RenameFileForm($filePath, $player));
 
 				}else{
 					/**@var WrittenBook $book */
@@ -149,7 +149,7 @@ final class FileEditorForm extends Form{
 					}
 				}
 			},
-			FormManager::onClose(new FileExplorerForm(dirname($filePath)))
+			FormManager::onClose(new FileExplorerForm(dirname($filePath), $player))
 		);
 
 		$this->setTitle("File Editor");
@@ -171,12 +171,15 @@ final class FileEditorForm extends Form{
 			"Size: " . Utils::bytesToHuman(filesize($filePath));
 
 		$this->setMessage($fileInfoMessage)
-			->addLocalImageButton("Rename", "textures/ui/pencil_edit_icon.png", self::RENAME_FILE)
-			->addLocalImageButton("Delete", "textures/ui/trash.png", self::DELETE_FILE)
 			->addLocalImageButton("Read", "textures/items/book_normal.png", self::READ_FILE);
 
-		if(is_writable($filePath)){
-			$this->addLocalImageButton("Edit", "textures/ui/text_color_paintbrush.png", self::EDIT_FILE);
+		if($player->hasPermission("st.ui.file-explorer.write")){
+			$this->addLocalImageButton("Rename", "textures/ui/pencil_edit_icon.png", self::RENAME_FILE)
+				->addLocalImageButton("Delete", "textures/ui/trash.png", self::DELETE_FILE);
+
+			if(is_writable($filePath)){
+				$this->addLocalImageButton("Edit", "textures/ui/text_color_paintbrush.png", self::EDIT_FILE);
+			}
 		}
 	}
 

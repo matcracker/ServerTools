@@ -53,6 +53,7 @@ final class DownloadPluginTask extends AsyncTask{
 		$data = file_get_contents($link);
 		if(!is_string($data)){
 			$this->setResult(false);
+
 			return;
 		}
 		$path = $this->pluginPath . basename($link);

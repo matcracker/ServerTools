@@ -18,7 +18,7 @@ use const DIRECTORY_SEPARATOR;
 
 final class NewFolderForm extends FileInputForm{
 
-	public function __construct(string $filePath, ?string $error = null){
+	public function __construct(string $filePath, Player $player, ?string $error = null){
 		if(!is_dir($filePath)){
 			throw new PluginException("The {$filePath} must be a folder.");
 		}
@@ -32,7 +32,7 @@ final class NewFolderForm extends FileInputForm{
 			function(Player $player, $data) use ($filePath): void{
 				$folderName = $data[self::FILE_NAME] ?? "";
 				if(strlen(trim($folderName)) === 0 || strpbrk($folderName, "\\/?%*:|\"<>") !== false){
-					$player->sendForm(new self($filePath, "Invalid name \"{$folderName}\" for this folder. Try again."));
+					$player->sendForm(new self($filePath, $player, "Invalid name \"{$folderName}\" for this folder. Try again."));
 
 					return;
 				}
@@ -40,15 +40,15 @@ final class NewFolderForm extends FileInputForm{
 				$newFilePath = $filePath . DIRECTORY_SEPARATOR . $folderName;
 				try{
 					if(mkdir($newFilePath)){
-						$player->sendForm(new FileExplorerForm($newFilePath));
+						$player->sendForm(new FileExplorerForm($newFilePath, $player));
 					}else{
 						$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not create " . $newFilePath));
 					}
 				}catch(Exception $e){
-					$player->sendForm(new self($filePath, "Error: " . $e->getMessage()));
+					$player->sendForm(new self($filePath, $player, "Error: " . $e->getMessage()));
 				}
 			},
-			FormManager::onClose(new FileExplorerForm($filePath))
+			FormManager::onClose(new FileExplorerForm($filePath, $player))
 		);
 	}
 }

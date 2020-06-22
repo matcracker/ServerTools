@@ -48,7 +48,7 @@ final class MainMenuForm extends Form{
 
 				switch($data){
 					case "file-explorer":
-						$player->sendForm(new FileExplorerForm(Utils::getServerPath()));
+						$player->sendForm(new FileExplorerForm(Utils::getServerPath(), $player));
 						break;
 					case "clone":
 						if(FTPConnection::hasExtension() || SFTPConnection::hasExtension()){

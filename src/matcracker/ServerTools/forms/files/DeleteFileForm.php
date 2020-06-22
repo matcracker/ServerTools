@@ -16,7 +16,7 @@ use function unlink;
 
 final class DeleteFileForm extends ModalForm{
 
-	public function __construct(string $filePath){
+	public function __construct(string $filePath, Player $player){
 		if(!is_file($filePath)){
 			throw new PluginException("The {$filePath} must be a file.");
 		}
@@ -29,13 +29,13 @@ final class DeleteFileForm extends ModalForm{
 
 						return;
 					}
-					$form = new FileExplorerForm(dirname($filePath, 1));
+					$form = new FileExplorerForm(dirname($filePath, 1), $player);
 				}else{
-					$form = new FileEditorForm($filePath);
+					$form = new FileEditorForm($filePath, $player);
 				}
 				$player->sendForm($form);
 			},
-			FormManager::onClose(new FileExplorerForm(dirname($filePath)))
+			FormManager::onClose(new FileExplorerForm(dirname($filePath), $player))
 		);
 		$this->setTitle("Confirm to delete file.")
 			->setMessage("Are you sure to delete the file {$filePath}?")
