@@ -29,20 +29,22 @@ use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use pocketmine\utils\Internet;
 use function count;
+use function explode;
 use function mb_strtolower;
 use function strlen;
 use function strpos;
+use function substr;
 
 final class SearchPluginTask extends AsyncTask{
 
 	private const POGGIT_RELEASES_URL = "https://poggit.pmmp.io/releases.min.json";
 	/** @var string */
-	private $pluginToSearch;
+	private $nameToSearch;
 	/** @var string */
 	private $playerName;
 
-	public function __construct(string $pluginToSearch, string $playerName){
-		$this->pluginToSearch = $pluginToSearch;
+	public function __construct(string $nameToSearch, string $playerName){
+		$this->nameToSearch = $nameToSearch;
 		$this->playerName = $playerName;
 	}
 
@@ -53,8 +55,20 @@ final class SearchPluginTask extends AsyncTask{
 		if($json !== false){
 			$poggitJson = json_decode($json, true);
 			if(is_array($poggitJson)){
+				$emptyInputSearch = strlen($this->nameToSearch) === 0;
+				$searchByAuthor = false;
+				$searchedAuthor = "";
+
+				if(!$emptyInputSearch){
+					$searchByAuthor = substr($this->nameToSearch, 0, 1) === "@";
+					$searchedAuthor = mb_strtolower(substr($this->nameToSearch, 1));
+					$searchByAuthor = $searchByAuthor && strlen($searchedAuthor) > 0;
+				}
+
 				foreach($poggitJson as $jsonData){
 					$exist = false;
+					$authorName = mb_strtolower(explode("/", $jsonData["repo_name"])[0]);
+
 					$name = $jsonData["name"];
 					foreach($results as $result){
 						if($result["name"] === $name){
@@ -63,13 +77,18 @@ final class SearchPluginTask extends AsyncTask{
 						}
 					}
 
-					if(!$exist &&
-						(strlen($this->pluginToSearch) === 0 || strpos(mb_strtolower($name), mb_strtolower($this->pluginToSearch)) !== false)
-					){
-						$results[] = [
-							"name" => $name,
-							"url" => $jsonData["icon_url"] ?? ""
-						];
+					if(!$exist){
+						if
+						(
+							$emptyInputSearch ||
+							($searchByAuthor && strpos($authorName, $searchedAuthor) !== false) ||
+							strpos(mb_strtolower($name), mb_strtolower($this->nameToSearch)) !== false
+						){
+							$results[] = [
+								"name" => $name,
+								"url" => $jsonData["icon_url"] ?? ""
+							];
+						}
 					}
 				}
 			}
@@ -87,7 +106,7 @@ final class SearchPluginTask extends AsyncTask{
 		/** @var string[][] $results */
 		$results = $this->getResult();
 		if(count($results) === 0){
-			$player->sendForm(new SearchPluginForm($this->pluginToSearch));
+			$player->sendForm(new SearchPluginForm($this->nameToSearch));
 
 			return;
 		}

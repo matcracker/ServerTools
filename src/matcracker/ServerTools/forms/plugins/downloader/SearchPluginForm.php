@@ -34,20 +34,30 @@ use function array_rand;
 final class SearchPluginForm extends CustomForm{
 
 	private const SPONSOR_PLUGINS = [
-		"BedcoreProtect", "ServerTools", "BlocksConverter"
+		"BedcoreProtect", "ServerTools", "BlocksConverter", "Elevator"
 	];
+	private const SEARCH = "search";
 
 	public function __construct(?string $pluginNotFound = null){
 		parent::__construct(
 			function(Player $player, $data) : void{
 				Server::getInstance()->getAsyncPool()->submitTask(
-					new SearchPluginTask($data[0] ?? "", $player->getName())
+					new SearchPluginTask($data[self::SEARCH] ?? "", $player->getName())
 				);
 			},
 			FormManager::onClose(FormManager::getMainMenu())
 		);
 		$this->setTitle("Search Poggit Plugin")
-			->addInput("Insert the plugin name to search:", "e.g. " . self::SPONSOR_PLUGINS[array_rand(self::SPONSOR_PLUGINS)]);
+			->addLabel(
+				"Hint:" . TextFormat::EOL .
+				"- Use \"@\" to search by author (e.g. @matcracker)"
+			)
+			->addInput(
+				"Insert the plugin name to search:",
+				"e.g. " . self::SPONSOR_PLUGINS[array_rand(self::SPONSOR_PLUGINS)],
+				null,
+				self::SEARCH
+			);
 
 		if($pluginNotFound !== null){
 			$this->addLabel(TextFormat::RED . $pluginNotFound . " does not exist on Poggit.");

@@ -31,7 +31,7 @@ use pocketmine\Server;
 use pocketmine\utils\Internet;
 use pocketmine\utils\TextFormat;
 use function count;
-use function implode;
+use function explode;
 
 final class GetPluginInfoTask extends AsyncTask{
 
@@ -56,7 +56,8 @@ final class GetPluginInfoTask extends AsyncTask{
 				foreach($poggitJson as $jsonData){
 					$pluginInfo[] = new PluginInfo(
 						$jsonData["name"],
-						implode(", ", $jsonData["producers"]["Collaborator"] ?? ["Unknown"]),
+						//TODO: Wait Poggit to fix #234 implode(", ", $jsonData["producers"]["Collaborator"] ?? ["Unknown"]),
+						explode("/", $jsonData["repo_name"])[0],
 						$jsonData["version"],
 						$jsonData["api"][0]["from"],
 						$jsonData["api"][0]["to"],
