@@ -59,7 +59,7 @@ final class DownloadPluginForm extends CustomForm{
 
 		parent::__construct(
 			function(Player $player, $data) use ($pluginsInfo) : void{
-				$pluginInfo = $pluginsInfo[$player->getName()][$data[3]];
+				$pluginInfo = $pluginsInfo[$player->getName()][(int) $data[3]];
 
 				$server = Server::getInstance();
 				$server->getAsyncPool()->submitTask(
