@@ -25,6 +25,7 @@ namespace matcracker\ServerTools\utils;
 
 use DirectoryIterator;
 use pocketmine\Server;
+use pocketmine\utils\Utils as PMUtils;
 use RecursiveCallbackFilterIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -34,6 +35,7 @@ use function glob;
 use function in_array;
 use function is_file;
 use function mb_substr;
+use function preg_match;
 use function rmdir;
 use function round;
 use function str_replace;
@@ -96,18 +98,70 @@ final class Utils{
 		return $fileList;
 	}
 
-	public static function removeAllFiles(string $path) : void{
+	public static function removeAllFiles(string $path) : bool{
 		$fileList = glob("{$path}/*");
-		if($fileList !== false){
-			foreach($fileList as $file){
-				if(is_file($file)){
-					unlink($file);
-				}else{
-					self::removeAllFiles($file);
+		if($fileList === false){
+			return false;
+		}
+
+		foreach($fileList as $file){
+			if(is_file($file)){
+				if(!unlink($file)){
+					return false;
+				}
+			}else{
+				if(!self::removeAllFiles($file)){
+					return false;
 				}
 			}
-			rmdir($path);
 		}
+		rmdir($path);
+
+		return true;
+	}
+
+	public static function isValidFileName(string $fileName) : bool{
+		$os = PMUtils::getOS();
+		switch($os){
+			case PMUtils::OS_WINDOWS:
+				return self::isValidWindowsFileName($fileName);
+			case PMUtils::OS_MACOS:
+			case PMUtils::OS_IOS:
+				return self::isValidMacFileName($fileName);
+			default:
+				return self::isValidUnixFileName($fileName);
+		}
+	}
+
+	public static function isValidWindowsFileName(string $fileName) : bool{
+		$regex = <<<'EOREGEX'
+			~                               # start of regular expression
+			^                               # Anchor to start of string.
+			(?!                             # Assert filename is not: CON, PRN, AUX, NUL, COM1, COM2, COM3, COM4, COM5, COM6, COM7, COM8, COM9, LPT1, LPT2, LPT3, LPT4, LPT5, LPT6, LPT7, LPT8, and LPT9.
+				(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])
+				(\.[^.]*)?                  # followed by optional extension
+				$                           # and end of string
+			)                               # End negative lookahead assertion.
+			[^<>:"/\\|?*\x00-\x1F]*         # Zero or more valid filename chars.
+			[^<>:"/\\|?*\x00-\x1F\ .]       # Last char is not a space or dot.
+			$                               # Anchor to end of string.
+											#
+											# tilde = end of regular expression.
+											# i = pattern modifier PCRE_CASELESS. Make the match case insensitive.
+											# x = pattern modifier PCRE_EXTENDED. Allows these comments inside the regex.
+											# D = pattern modifier PCRE_DOLLAR_ENDONLY. A dollar should not match a newline if it is the final character.
+			~ixD
+			EOREGEX;
+
+		return preg_match($regex, $fileName) === 1;
+	}
+
+	public static function isValidMacFileName(string $fileName) : bool{
+		return preg_match("/[\/:]/", $fileName) === 0;
+	}
+
+	public static function isValidUnixFileName(string $fileName) : bool{
+		return preg_match("/[\x00\/]/", $fileName) === 0;
 	}
 
 	public static function getServerPath() : string{

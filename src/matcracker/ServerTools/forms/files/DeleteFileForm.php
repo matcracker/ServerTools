@@ -11,13 +11,13 @@ use pocketmine\Player;
 use pocketmine\plugin\PluginException;
 use pocketmine\utils\TextFormat;
 use function dirname;
-use function is_dir;
+use function is_file;
 use function unlink;
 
 final class DeleteFileForm extends ModalForm{
 
 	public function __construct(string $filePath){
-		if(is_dir($filePath)){
+		if(!is_file($filePath)){
 			throw new PluginException("The {$filePath} must be a file.");
 		}
 
@@ -37,7 +37,7 @@ final class DeleteFileForm extends ModalForm{
 			},
 			FormManager::onClose(new FileExplorerForm(dirname($filePath)))
 		);
-		$this->setTitle("Delete file")
+		$this->setTitle("Confirm to delete file.")
 			->setMessage("Are you sure to delete the file {$filePath}?")
 			->setFirstButton("Yes")
 			->setSecondButton("No");

@@ -6,9 +6,11 @@ namespace matcracker\ServerTools\forms\files;
 
 use matcracker\FormLib\ModalForm;
 use matcracker\ServerTools\forms\FormManager;
+use matcracker\ServerTools\Main;
 use matcracker\ServerTools\utils\Utils;
 use pocketmine\Player;
 use pocketmine\plugin\PluginException;
+use pocketmine\utils\TextFormat;
 use function dirname;
 use function is_dir;
 
@@ -22,7 +24,11 @@ final class DeleteFolderForm extends ModalForm{
 		parent::__construct(
 			function(Player $player, $data) use ($folderPath): void{
 				if($data){
-					Utils::removeAllFiles($folderPath);
+					if(!Utils::removeAllFiles($folderPath)){
+						$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not delete folder {$folderPath}."));
+
+						return;
+					}
 					$form = new FileExplorerForm(dirname($folderPath, 1));
 				}else{
 					$form = new FileExplorerForm($folderPath);
@@ -31,7 +37,7 @@ final class DeleteFolderForm extends ModalForm{
 			},
 			FormManager::onClose(new FileExplorerForm($folderPath))
 		);
-		$this->setTitle("Delete folder")
+		$this->setTitle("Confirm to delete folder.")
 			->setMessage("Are you sure to delete the folder {$folderPath} and all its contents?")
 			->setFirstButton("Yes")
 			->setSecondButton("No");

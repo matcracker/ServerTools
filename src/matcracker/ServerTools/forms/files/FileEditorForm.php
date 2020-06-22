@@ -45,6 +45,7 @@ use function fgets;
 use function filesize;
 use function fopen;
 use function is_dir;
+use function is_file;
 use function is_readable;
 use function is_writable;
 use function str_repeat;
@@ -80,7 +81,7 @@ final class FileEditorForm extends Form{
 	private const DELETE_FILE = "/delete_file";
 
 	public function __construct(string $filePath){
-		if(is_dir($filePath)){
+		if(!is_file($filePath)){
 			throw new PluginException("The {$filePath} must be a file.");
 		}
 
