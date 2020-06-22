@@ -48,12 +48,11 @@ final class GetPluginInfoTask extends AsyncTask{
 
 	public function onRun() : void{
 		$json = Internet::getURL(self::POGGIT_RELEASES_URL . $this->pluginName);
+		$pluginInfo = [];
 
 		if($json !== false){
 			$poggitJson = json_decode($json, true);
 			if(is_array($poggitJson)){
-				$pluginInfo = [];
-
 				foreach($poggitJson as $jsonData){
 					$pluginInfo[] = new PluginInfo(
 						$jsonData["name"],
@@ -68,9 +67,10 @@ final class GetPluginInfoTask extends AsyncTask{
 					);
 				}
 
-				$this->setResult($pluginInfo);
+
 			}
 		}
+		$this->setResult($pluginInfo);
 	}
 
 	public function onCompletion(Server $server) : void{
@@ -78,9 +78,9 @@ final class GetPluginInfoTask extends AsyncTask{
 		if($player === null){
 			return;
 		}
-		/** @var PluginInfo[]|null $pluginInfo */
+		/** @var PluginInfo[] $pluginInfo */
 		$pluginInfo = $this->getResult();
-		if($pluginInfo === null || count($pluginInfo) === 0){
+		if(count($pluginInfo) === 0){
 			$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not connect to Poggit."));
 
 			return;

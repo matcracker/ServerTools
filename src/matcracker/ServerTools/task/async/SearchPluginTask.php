@@ -49,10 +49,10 @@ final class SearchPluginTask extends AsyncTask{
 	public function onRun() : void{
 		$json = Internet::getURL(self::POGGIT_RELEASES_URL);
 
+		$results = [];
 		if($json !== false){
 			$poggitJson = json_decode($json, true);
 			if(is_array($poggitJson)){
-				$results = [];
 				foreach($poggitJson as $jsonData){
 					$exist = false;
 					$name = $jsonData["name"];
@@ -72,10 +72,10 @@ final class SearchPluginTask extends AsyncTask{
 						];
 					}
 				}
-
-				$this->setResult($results);
 			}
 		}
+
+		$this->setResult($results);
 	}
 
 	public function onCompletion(Server $server) : void{
@@ -83,9 +83,10 @@ final class SearchPluginTask extends AsyncTask{
 		if($player === null){
 			return;
 		}
-		/** @var string[][]|null $results */
+
+		/** @var string[][] $results */
 		$results = $this->getResult();
-		if($results === null || count($results) === 0){
+		if(count($results) === 0){
 			$player->sendForm(new SearchPluginForm($this->pluginToSearch));
 
 			return;

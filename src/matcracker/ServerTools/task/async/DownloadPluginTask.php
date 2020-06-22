@@ -52,15 +52,11 @@ final class DownloadPluginTask extends AsyncTask{
 		$link = $this->pluginInfo->getDownloadLink();
 		$data = file_get_contents($link);
 		if(!is_string($data)){
+			$this->setResult(false);
 			return;
 		}
 		$path = $this->pluginPath . basename($link);
-
-		if(file_put_contents($path, $data) === false){
-			return;
-		}
-
-		$this->setResult(true);
+		$this->setResult(file_put_contents($path, $data) !== false);
 	}
 
 	public function onCompletion(Server $server) : void{
@@ -71,7 +67,9 @@ final class DownloadPluginTask extends AsyncTask{
 
 		$pluginName = $this->pluginInfo->getPluginName();
 
-		if($this->getResult() !== null){
+		/** @var bool $success */
+		$success = $this->getResult();
+		if($success){
 			$player->sendMessage(Main::formatMessage(TextFormat::GREEN . "{$pluginName} successfully downloaded."));
 		}else{
 			$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not download {$pluginName} plugin."));
