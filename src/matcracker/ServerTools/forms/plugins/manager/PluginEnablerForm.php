@@ -59,8 +59,7 @@ final class PluginEnablerForm extends Form{
 		);
 		$this->setTitle("Enable/Disable Plugins")
 			->setMessage(
-				TextFormat::BOLD . TextFormat::GOLD . "WARNING: " . TextFormat::EOL .
-				"- USE THIS FUNCTION CAREFULLY" . TextFormat::EOL .
+				TextFormat::BOLD . TextFormat::GOLD . "WARNING! USE THIS FUNCTION CAREFULLY:" . TextFormat::EOL .
 				TextFormat::RESET . TextFormat::GOLD . "- The plugin commands will still remain usable (they could cause a crash if used)." . TextFormat::EOL .
 				"- Disabling and re-enabling a plugin could cause your server to crash."
 			);
