@@ -34,7 +34,7 @@ final class RenameFileForm extends FileInputForm{
 			function(Player $player, $data) use ($filePath): void{
 				$fileName = $data[self::FILE_NAME] ?? "";
 				if(strlen(trim($fileName)) === 0 || !Utils::isValidFileName($fileName)){
-					$player->sendForm(new self($filePath, $player, "Invalid name \"{$fileName}\" for this folder. Try again"));
+					$player->sendForm(new self($filePath, $player, "Invalid name \"{$fileName}\" for this file. Try again"));
 
 					return;
 				}
