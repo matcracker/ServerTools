@@ -21,13 +21,13 @@ permissions:
         default: false
   st.ui.clone:
     description: "Allows to use the cloning function"
-    default: op
+    default: false
   st.ui.plugin-manager:
     description: "Allows to use the plugin manager function"
-    default: op
+    default: false
   st.ui.poggit-downloader:
     description: "Allows to use the poggit plugin downloader function"
-    default: op
+    default: false
   st.ui.restart:
     description: "Allows to use the restart function"
     default: op
