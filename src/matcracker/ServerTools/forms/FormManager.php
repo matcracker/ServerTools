@@ -33,18 +33,11 @@ use pocketmine\Player;
 final class FormManager{
 	public const BACK_LABEL = "/back";
 
-	/** @var self */
-	private static $instance;
 	/** @var Main */
 	protected $plugin;
 
 	public function __construct(Main $plugin){
 		$this->plugin = $plugin;
-		self::$instance = $this;
-	}
-
-	public static function getInstance() : FormManager{
-		return self::$instance;
 	}
 
 	final public static function getConfirmForm(string $title, string $message, ?Closure $onClose = null) : Form{
@@ -71,7 +64,7 @@ final class FormManager{
 		};
 	}
 
-	public function getMainMenu() : Form{
-		return new MainMenuForm($this->plugin);
+	public static function getMainMenu() : Form{
+		return new MainMenuForm();
 	}
 }

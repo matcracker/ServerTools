@@ -47,7 +47,7 @@ final class CloneForm extends Form{
 					$player->sendForm($this->getFTPForm());
 				}
 			},
-			FormManager::onClose(FormManager::getInstance()->getMainMenu())
+			FormManager::onClose(FormManager::getMainMenu())
 		);
 		$this->setTitle("Transfer Mode")
 			->setMessage("Select a mode to send your server data to another one.");

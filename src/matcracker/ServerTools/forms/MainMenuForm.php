@@ -37,7 +37,7 @@ use pocketmine\utils\TextFormat;
 
 final class MainMenuForm extends Form{
 
-	public function __construct(Main $plugin){
+	public function __construct(){
 		parent::__construct(
 			function(Player $player, $data) : void{
 				if(!$player->hasPermission("st.ui.{$data}")){
@@ -82,7 +82,7 @@ final class MainMenuForm extends Form{
 			},
 			null
 		);
-		$this->setTitle("Server Tools v" . $plugin->getDescription()->getVersion())
+		$this->setTitle("Server Tools")
 			->addClassicButton("File Explorer", "file-explorer")
 			->addClassicButton("Clone Server", "clone")
 			->addClassicButton("Plugin Manager", "plugin-manager")

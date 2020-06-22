@@ -44,7 +44,7 @@ final class SearchPluginForm extends CustomForm{
 					new SearchPluginTask($data[0] ?? "", $player->getName())
 				);
 			},
-			FormManager::onClose(FormManager::getInstance()->getMainMenu())
+			FormManager::onClose(FormManager::getMainMenu())
 		);
 		$this->setTitle("Search Poggit Plugin")
 			->addInput("Insert the plugin name to search:", "e.g. " . self::SPONSOR_PLUGINS[array_rand(self::SPONSOR_PLUGINS)]);

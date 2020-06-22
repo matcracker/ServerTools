@@ -42,7 +42,7 @@ final class PluginManagerForm extends Form{
 				}
 
 			},
-			FormManager::onClose(FormManager::getInstance()->getMainMenu())
+			FormManager::onClose(FormManager::getMainMenu())
 		);
 		$this->setTitle("Plugin Manager")
 			->addClassicButton("Enable/Disable plugin")

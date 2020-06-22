@@ -65,7 +65,7 @@ final class BaseFTPForm extends CustomForm{
 
 				$player->sendForm(new ExcludeFilesForm($ftpConnection));
 			},
-			FormManager::onClose(FormManager::getInstance()->getMainMenu())
+			FormManager::onClose(FormManager::getMainMenu())
 		);
 
 		$this->setTitle($title)

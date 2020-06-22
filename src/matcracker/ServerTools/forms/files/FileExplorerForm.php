@@ -36,7 +36,7 @@ use const DIRECTORY_SEPARATOR;
 
 final class FileExplorerForm extends Form{
 
-	public const NEW_FILE = "/new_file";
+	private const NEW_FILE = "/new_file";
 	private const NEW_FOLDER = "/new_folder";
 	private const RENAME_FOLDER = "/rename_folder";
 	private const DELETE_FOLDER = "/delete_folder";
@@ -71,7 +71,7 @@ final class FileExplorerForm extends Form{
 
 				$player->sendForm($form);
 			},
-			FormManager::onClose(FormManager::getInstance()->getMainMenu())
+			FormManager::onClose(FormManager::getMainMenu())
 		);
 		$this->setTitle("File Explorer")
 			->setMessage($filePath);
