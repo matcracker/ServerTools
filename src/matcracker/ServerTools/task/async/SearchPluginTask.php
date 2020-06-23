@@ -65,30 +65,26 @@ final class SearchPluginTask extends AsyncTask{
 					$searchByAuthor = $searchByAuthor && strlen($searchedAuthor) > 0;
 				}
 
+				$prevName = "";
 				foreach($poggitJson as $jsonData){
-					$exist = false;
 					$authorName = mb_strtolower(explode("/", $jsonData["repo_name"])[0]);
+					$pluginName = $jsonData["name"];
 
-					$name = $jsonData["name"];
-					foreach($results as $result){
-						if($result["name"] === $name){
-							$exist = true;
-							break;
-						}
+					if($prevName === $pluginName){ //Because the list is sorted alphabetically.
+						continue;
 					}
+					$prevName = $pluginName;
 
-					if(!$exist){
-						if
-						(
-							$emptyInputSearch ||
-							($searchByAuthor && strpos($authorName, $searchedAuthor) !== false) ||
-							strpos(mb_strtolower($name), mb_strtolower($this->nameToSearch)) !== false
-						){
-							$results[] = [
-								"name" => $name,
-								"url" => $jsonData["icon_url"] ?? ""
-							];
-						}
+					if
+					(
+						$emptyInputSearch ||
+						($searchByAuthor && strpos($authorName, $searchedAuthor) !== false) ||
+						strpos(mb_strtolower($pluginName), mb_strtolower($this->nameToSearch)) !== false
+					){
+						$results[] = [
+							"name" => $pluginName,
+							"url" => $jsonData["icon_url"] ?? ""
+						];
 					}
 				}
 			}
