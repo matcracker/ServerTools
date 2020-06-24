@@ -25,6 +25,7 @@ namespace matcracker\ServerTools\task\thread;
 
 use pocketmine\Thread;
 use pocketmine\utils\Utils;
+use function is_resource;
 use function proc_close;
 use function proc_open;
 
@@ -48,9 +49,12 @@ class RestartServerThread extends Thread{
 		if($os === Utils::OS_WINDOWS){
 			$cmd = "start cmd.exe /c \"{$this->fileName}\"";
 		}else{
-			$cmd = "./{$this->fileName} > /dev/null 2>&1 &";
+			$cmd = "./{$this->fileName}";
 		}
 
-		proc_close(proc_open($cmd, [], $pipes));
+		$res = proc_open($cmd, [], $pipes);
+		if(is_resource($res)){
+			proc_close($res);
+		}
 	}
 }

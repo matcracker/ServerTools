@@ -47,6 +47,7 @@ final class Main extends PluginBase{
 			return false;
 		}
 
+		$this->getLogger()->notice("Restarting the server...");
 		new RestartServerThread($startFileName);
 
 		$this->getServer()->shutdown();
