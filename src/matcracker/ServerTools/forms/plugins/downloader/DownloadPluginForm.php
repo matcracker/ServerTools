@@ -36,6 +36,8 @@ use function mb_strtoupper;
 
 final class DownloadPluginForm extends CustomForm{
 
+	private const SELECTED_VERSION = "version";
+
 	/**
 	 * DownloadPluginForm constructor.
 	 *
@@ -59,7 +61,7 @@ final class DownloadPluginForm extends CustomForm{
 
 		parent::__construct(
 			function(Player $player, $data) use ($pluginsInfo) : void{
-				$pluginInfo = $pluginsInfo[$player->getName()][(int) $data[3]];
+				$pluginInfo = $pluginsInfo[(int) $data[self::SELECTED_VERSION]];
 
 				$server = Server::getInstance();
 				$server->getAsyncPool()->submitTask(
@@ -73,7 +75,7 @@ final class DownloadPluginForm extends CustomForm{
 			->addLabel(TextFormat::BOLD . $firstInfo->getShortDescription())
 			->addLabel("Author(s): " . $firstInfo->getAuthors())
 			->addLabel("License: " . mb_strtoupper($firstInfo->getLicense()))
-			->addDropdown("Select the version", $versions)
+			->addDropdown("Select the version", $versions, null, self::SELECTED_VERSION)
 			->addLabel(TextFormat::BOLD . TextFormat::GOLD . "Server API version: {$serverApi}")
 			->addLabel("Press \"Submit\" to start the download.");
 	}
