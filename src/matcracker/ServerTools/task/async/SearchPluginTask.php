@@ -67,13 +67,13 @@ final class SearchPluginTask extends AsyncTask{
 
 				$prevName = "";
 				foreach($poggitJson as $jsonData){
-					$authorName = mb_strtolower(explode("/", $jsonData["repo_name"])[0]);
 					$pluginName = $jsonData["name"];
 
 					if($prevName === $pluginName){ //Because the list is sorted alphabetically.
 						continue;
 					}
 					$prevName = $pluginName;
+					$authorName = mb_strtolower(explode("/", $jsonData["repo_name"])[0]);
 
 					if
 					(
