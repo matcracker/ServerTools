@@ -26,39 +26,35 @@ namespace matcracker\ServerTools;
 use JackMD\UpdateNotifier\UpdateNotifier;
 use matcracker\ServerTools\commands\ServerToolsCommand;
 use matcracker\ServerTools\forms\FormManager;
+use matcracker\ServerTools\task\thread\RestartServerThread;
+use matcracker\ServerTools\utils\Utils;
 use pocketmine\plugin\PluginBase;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
-use pocketmine\utils\Utils;
-use function is_executable;
-use function pcntl_exec;
-use function register_shutdown_function;
+use function file_exists;
+use const DIRECTORY_SEPARATOR;
 
 final class Main extends PluginBase{
 
 	/** @var FormManager */
 	private $formManager;
 
-	public static function restartServer(Server $server) : bool{
-		if(Utils::getOS() !== "win"){
-			if(!is_executable("start.sh")){
-				return false;
-			}
-
-			register_shutdown_function(static function() : void{
-				pcntl_exec("./start.sh");
-			});
-
-			$server->shutdown();
-
-			return true;
-		}
-
-		return false;
-	}
-
 	public static function formatMessage(string $message) : string{
 		return TextFormat::AQUA . "[ServerTools] " . TextFormat::RESET . $message;
+	}
+
+	public function restartServer() : bool{
+		$startFile = $this->getConfig()->getNested("restart.file-name");
+		$path = Utils::getServerPath() . DIRECTORY_SEPARATOR . $startFile;
+
+		if(!file_exists($path)){
+			return false;
+		}
+
+		new RestartServerThread($path);
+
+		$this->getServer()->shutdown();
+
+		return true;
 	}
 
 	public function onLoad() : void{

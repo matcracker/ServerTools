@@ -1,0 +1,9 @@
+---
+# Restart configuration
+# Put the executable file name to start the server.
+# Example:
+# - Windows should be "start.cmd"
+# - Other platform is "start.sh"
+restart:
+  file-name: "start.cmd"
+...

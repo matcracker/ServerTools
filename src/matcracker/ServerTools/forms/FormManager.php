@@ -34,10 +34,10 @@ final class FormManager{
 	public const BACK_LABEL = "/back";
 
 	/** @var Main */
-	protected $plugin;
+	private static $plugin;
 
 	public function __construct(Main $plugin){
-		$this->plugin = $plugin;
+		self::$plugin = $plugin;
 	}
 
 	final public static function getConfirmForm(string $title, string $message, ?Closure $onClose = null) : Form{
@@ -65,6 +65,6 @@ final class FormManager{
 	}
 
 	public static function getMainMenu() : Form{
-		return new MainMenuForm();
+		return new MainMenuForm(self::$plugin);
 	}
 }
