@@ -27,15 +27,14 @@ use pocketmine\Thread;
 use pocketmine\utils\Utils;
 use function proc_close;
 use function proc_open;
-use function shell_exec;
 
 class RestartServerThread extends Thread{
 
 	/** @var string */
-	private $filePath;
+	private $fileName;
 
-	public function __construct(string $filePath){
-		$this->filePath = $filePath;
+	public function __construct(string $fileName){
+		$this->fileName = $fileName;
 		$this->start();
 	}
 
@@ -47,9 +46,11 @@ class RestartServerThread extends Thread{
 		parent::quit();
 		$os = Utils::getOS();
 		if($os === Utils::OS_WINDOWS){
-			proc_close(proc_open("start cmd.exe /c \"{$this->filePath}\"", [], $pipes));
+			$cmd = "start cmd.exe /c \"{$this->fileName}\"";
 		}else{
-			shell_exec("{$this->filePath} > /dev/null 2>&1 &");
+			$cmd = "./{$this->fileName} > /dev/null 2>&1 &";
 		}
+
+		proc_close(proc_open($cmd, [], $pipes));
 	}
 }

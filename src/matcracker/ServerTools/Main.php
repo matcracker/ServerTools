@@ -27,11 +27,9 @@ use JackMD\UpdateNotifier\UpdateNotifier;
 use matcracker\ServerTools\commands\ServerToolsCommand;
 use matcracker\ServerTools\forms\FormManager;
 use matcracker\ServerTools\task\thread\RestartServerThread;
-use matcracker\ServerTools\utils\Utils;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
 use function file_exists;
-use const DIRECTORY_SEPARATOR;
 
 final class Main extends PluginBase{
 
@@ -43,14 +41,13 @@ final class Main extends PluginBase{
 	}
 
 	public function restartServer() : bool{
-		$startFile = $this->getConfig()->getNested("restart.file-name");
-		$path = Utils::getServerPath() . DIRECTORY_SEPARATOR . $startFile;
+		$startFileName = $this->getConfig()->getNested("restart.file-name");
 
-		if(!file_exists($path)){
+		if(!file_exists($startFileName)){
 			return false;
 		}
 
-		new RestartServerThread($path);
+		new RestartServerThread($startFileName);
 
 		$this->getServer()->shutdown();
 
