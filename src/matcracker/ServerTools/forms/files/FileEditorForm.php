@@ -160,27 +160,26 @@ final class FileEditorForm extends Form{
 			return;
 		}
 
-		if(filesize($filePath) > self::BOOK_MAX_SIZE){
-			$this->setMessage(TextFormat::RED . "Cannot open the file \"{$fileName}\" because it exceeds the max allowed size of ~" . Utils::bytesToHuman(self::BOOK_MAX_SIZE));
-
-			return;
-		}
-
 		$fileInfoMessage =
 			"Name: {$fileName}" . TextFormat::EOL .
 			"Size: " . Utils::bytesToHuman(filesize($filePath));
 
-		$this->setMessage($fileInfoMessage)
-			->addLocalImageButton("Read", "textures/items/book_normal.png", self::READ_FILE);
+		$this->setMessage($fileInfoMessage);
 
-		if($player->hasPermission("st.ui.file-explorer.write")){
-			$this->addLocalImageButton("Rename", "textures/ui/pencil_edit_icon.png", self::RENAME_FILE)
-				->addLocalImageButton("Delete", "textures/ui/trash.png", self::DELETE_FILE);
+		if($canBeOpen = (filesize($filePath) <= self::BOOK_MAX_SIZE)){
+			$this->addLocalImageButton("Read", "textures/items/book_normal.png", self::READ_FILE);
+		}
 
-			if(is_writable($filePath)){
+		if(is_writable($filePath) && $player->hasPermission("st.ui.file-explorer.write")){
+			if($canBeOpen){
 				$this->addLocalImageButton("Edit", "textures/ui/text_color_paintbrush.png", self::EDIT_FILE);
 			}
+
+			$this->addLocalImageButton("Rename", "textures/ui/pencil_edit_icon.png", self::RENAME_FILE)
+				->addLocalImageButton("Delete", "textures/ui/trash.png", self::DELETE_FILE);
 		}
+
+
 	}
 
 	public static function setupFileBook(WritableBook $book, string $filePath) : WritableBook{
