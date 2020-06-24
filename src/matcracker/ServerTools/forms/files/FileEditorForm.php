@@ -178,8 +178,6 @@ final class FileEditorForm extends Form{
 			$this->addLocalImageButton("Rename", "textures/ui/pencil_edit_icon.png", self::RENAME_FILE)
 				->addLocalImageButton("Delete", "textures/ui/trash.png", self::DELETE_FILE);
 		}
-
-
 	}
 
 	public static function setupFileBook(WritableBook $book, string $filePath) : WritableBook{
