@@ -26,10 +26,12 @@ namespace matcracker\ServerTools;
 use JackMD\UpdateNotifier\UpdateNotifier;
 use matcracker\ServerTools\commands\ServerToolsCommand;
 use matcracker\ServerTools\forms\FormManager;
-use matcracker\ServerTools\task\thread\RestartServerThread;
+use matcracker\ServerTools\task\thread\RestartWindowsServer;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
+use pocketmine\utils\Utils;
 use function file_exists;
+use function register_shutdown_function;
 
 final class Main extends PluginBase{
 
@@ -41,14 +43,25 @@ final class Main extends PluginBase{
 	}
 
 	public function restartServer() : bool{
-		$startFileName = $this->getConfig()->getNested("restart.file-name");
+		$os = Utils::getOS();
+		$defaultExt = $os === Utils::OS_WINDOWS ? "cmd" : "sh";
+		$startFileName = $this->getConfig()->getNested("restart.file-name", "start.{$defaultExt}");
 
 		if(!file_exists($startFileName)){
 			return false;
 		}
 
 		$this->getLogger()->notice("Restarting the server...");
-		new RestartServerThread($startFileName);
+
+		if($os === Utils::OS_WINDOWS){
+			new RestartWindowsServer($startFileName);
+		}else{
+			register_shutdown_function(
+				static function() use($startFileName): void{
+					pcntl_exec("./{$startFileName}");
+				}
+			);
+		}
 
 		$this->getServer()->shutdown();
 

@@ -23,36 +23,29 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\task\thread;
 
+use InvalidStateException;
 use pocketmine\Thread;
 use pocketmine\utils\Utils;
 use function is_resource;
 use function proc_close;
 use function proc_open;
 
-class RestartServerThread extends Thread{
+final class RestartWindowsServer extends Thread{
 
 	/** @var string */
 	private $fileName;
 
 	public function __construct(string $fileName){
 		$this->fileName = $fileName;
+		if(($os = Utils::getOS()) !== Utils::OS_WINDOWS){
+			throw new InvalidStateException("Could not use this thread on {$os} OS");
+		}
 		$this->start();
-	}
-
-	public function run(){
-		//NOOP
 	}
 
 	public function quit(){
 		parent::quit();
-		$os = Utils::getOS();
-		if($os === Utils::OS_WINDOWS){
-			$cmd = "start cmd.exe /c \"{$this->fileName}\"";
-		}else{
-			$cmd = "./{$this->fileName}";
-		}
-
-		$res = proc_open($cmd, [], $pipes);
+		$res = proc_open("start cmd.exe /c \"{$this->fileName}\"", [], $pipes);
 		if(is_resource($res)){
 			proc_close($res);
 		}
