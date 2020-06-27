@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools;
 
+use JackMD\ConfigUpdater\ConfigUpdater;
 use JackMD\UpdateNotifier\UpdateNotifier;
 use matcracker\ServerTools\commands\ServerToolsCommand;
 use matcracker\ServerTools\forms\FormManager;
@@ -34,7 +35,7 @@ use function file_exists;
 use function register_shutdown_function;
 
 final class Main extends PluginBase{
-
+	private const CONFIG_VERSION = 1;
 	/** @var FormManager */
 	private $formManager;
 
@@ -43,9 +44,7 @@ final class Main extends PluginBase{
 	}
 
 	public function restartServer() : bool{
-		$os = Utils::getOS();
-		$defaultExt = $os === Utils::OS_WINDOWS ? "cmd" : "sh";
-		$startFileName = $this->getConfig()->getNested("restart.file-name", "start.{$defaultExt}");
+		$startFileName = $this->getConfig()->getNested("restart.file-name");
 
 		if(!file_exists($startFileName)){
 			return false;
@@ -53,11 +52,11 @@ final class Main extends PluginBase{
 
 		$this->getLogger()->notice("Restarting the server...");
 
-		if($os === Utils::OS_WINDOWS){
+		if(Utils::getOS() === Utils::OS_WINDOWS){
 			new RestartWindowsServer($startFileName);
 		}else{
 			register_shutdown_function(
-				static function() use($startFileName): void{
+				static function() use ($startFileName): void{
 					pcntl_exec("./{$startFileName}");
 				}
 			);
@@ -73,7 +72,7 @@ final class Main extends PluginBase{
 	}
 
 	public function onEnable() : void{
-		@mkdir($this->getDataFolder());
+		ConfigUpdater::checkUpdate($this, $this->getConfig(), "config-version", self::CONFIG_VERSION);
 
 		$this->getServer()->getCommandMap()->register('servertools', new ServerToolsCommand($this));
 		$this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);

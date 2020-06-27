@@ -7,7 +7,9 @@ projects:
     icon: resources/servertools_logo.png
     libs:
       - src: JackMD/UpdateNotifier/UpdateNotifier
-        version: 2.1.0
+        version: ~2.1.0
+      - src: JackMD/ConfigUpdater/ConfigUpdater
+        version: ~1.0.0
       - src: matcracker/FormLib/FormLib
-        version: 1.2.0
+        version: ~1.2.0
 ...
