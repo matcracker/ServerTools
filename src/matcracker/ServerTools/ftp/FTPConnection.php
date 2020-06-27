@@ -33,7 +33,7 @@ use function ftp_ssl_connect;
 use function is_resource;
 
 final class FTPConnection extends FTPBase{
-
+  	/** @var bool */
 	private $ssl;
 
 	public function __construct(string $host, int $port, string $username, string $password, string $remoteHomePath, bool $ssl){
