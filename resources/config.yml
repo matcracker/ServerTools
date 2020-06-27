@@ -1,9 +1,12 @@
 ---
+# DON'T EDIT THE CONFIG VERSION VALUE!
+config-version: 1
+
 # Restart configuration
 # Put the executable file name to start the server.
 # Example:
 # - Windows should be "start.cmd"
 # - Other platform should be "start.sh"
 restart:
-  file-name: "start.cmd"
+  file-name: "start.sh"
 ...
