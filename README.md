@@ -17,10 +17,11 @@ ServerTools is Pocketmine-MP plugin containing a set of tools that allows you to
 ![Main_Menu](https://github.com/matcracker/ServerTools/blob/master/.github/README_IMAGES/Form_Main.png)
 
 ## Commands
-- **/servertools** (or alias: **/st**) - _The main command of plugin_ (**Permission (default OP):** _st.command.servertools_)
+- **/servertools** (or alias: **/st**) - _The main command of plugin_ (**Permission (default OP)** _st.command.servertools_)
 
 ## File Explorer
 **Permission (default OP):** _st.ui.file-explorer_
+**Permission to create/edit files and folders (default false):** _st.ui.file-explorer.write_
 
 It allows to explore and edit your server folder and files.
 
@@ -33,7 +34,7 @@ It allows to explore and edit your server folder and files.
 ![EditFile](https://github.com/matcracker/ImageContainer/blob/master/ServerTools/Form_FE_WriteFile.gif)
 
 ## Cloning
-**Permission (default OP):** _st.ui.clone_
+**Permission (default false):** _st.ui.clone_
 
 It allows to clone your server using **FTP** (also available with SSL) or **SFTP** protocols.
 
@@ -55,7 +56,7 @@ It allows to clone your server using **FTP** (also available with SSL) or **SFTP
 ![Progress](https://github.com/matcracker/ServerTools/blob/master/.github/README_IMAGES/Form_Clone_Progress.png)
 
 ## Plugin Manager
-**Permission (default OP):** _st.ui.plugin-manager_
+**Permission (default false):** _st.ui.plugin-manager_
 
 ![PluginManager](https://github.com/matcracker/ServerTools/blob/master/.github/README_IMAGES/Form_PluginManager.png)
 
@@ -67,7 +68,7 @@ It allows to:
 ![LoadPharPlugin](https://github.com/matcracker/ServerTools/blob/master/.github/README_IMAGES/Form_PluginManager_LoadPlugin.png)
 
 ## Poggit Plugin Downloader
-**Permission (default OP):** _st.ui.poggit-downloader_
+**Permission (default false):** _st.ui.poggit-downloader_
 
 It allows to search and download to your server a plugin from poggit website.
 
