@@ -3,7 +3,7 @@
 [![Discord](https://img.shields.io/discord/620519017148579841.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/eAePyeb)
 
 # ServerTools
-ServerTools is Pocketmine-MP plugin containing a set of tools that allows you to manage your server directly from the game!
+ServerTools is PocketMine-MP plugin containing a set of tools that allows you to manage your server directly from the game!
 
 ## Features
 - File Explorer
@@ -23,7 +23,10 @@ ServerTools is Pocketmine-MP plugin containing a set of tools that allows you to
 **Permission (default OP):** _st.ui.file-explorer_
 **Permission to create/edit files and folders (default false):** _st.ui.file-explorer.write_
 
-It allows to explore and edit your server folder and files.
+It allows to:
+- Explore your server files and folder
+- Read your files **(max file size is ~10.25 kB)**
+- Create, rename and edit files and folders **(requires write permission)**
 
 ![FileExplorer](https://github.com/matcracker/ServerTools/blob/master/.github/README_IMAGES/Form_FileExplorer.png)
 
@@ -75,8 +78,6 @@ It allows to search and download to your server a plugin from poggit website.
 ![PoggitDownloader](https://github.com/matcracker/ImageContainer/blob/master/ServerTools/Form_PoggitDownloader.gif)
 
 ## Restart Server
-**NOT WORKING ON WINDOWS OPERATING SYSTEM!**
-
-**Permission:** _st.ui.restart_
+**Permission (default OP):** _st.ui.restart_
 
 It simply restarts your server.
