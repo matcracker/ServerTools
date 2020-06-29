@@ -20,13 +20,13 @@ ServerTools is PocketMine-MP plugin containing a set of tools that allows you to
 - **/servertools** (or alias: **/st**) - _The main command of plugin_ (**Permission (default OP)** _st.command.servertools_)
 
 ## File Explorer
-**Permission (default OP):** _st.ui.file-explorer_
+**Permission (default OP):** _st.ui.file-explorer_<br/>
 **Permission to create/edit files and folders (default false):** _st.ui.file-explorer.write_
 
 It allows to:
 - Explore your server files and folder
 - Read your files **(max file size is ~10.25 kB)**
-- Create, rename and edit files and folders **(requires write permission)**
+- Create, rename, delete and edit files and folders **(requires write permission)**
 
 ![FileExplorer](https://github.com/matcracker/ServerTools/blob/master/.github/README_IMAGES/Form_FileExplorer.png)
 
