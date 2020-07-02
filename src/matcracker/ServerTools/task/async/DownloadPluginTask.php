@@ -32,6 +32,7 @@ use function basename;
 use function file_get_contents;
 use function file_put_contents;
 use function is_string;
+use function stream_context_create;
 
 final class DownloadPluginTask extends AsyncTask{
 
@@ -50,7 +51,14 @@ final class DownloadPluginTask extends AsyncTask{
 
 	public function onRun() : void{
 		$link = $this->pluginInfo->getDownloadLink();
-		$data = file_get_contents($link);
+
+		static $stream_opts = [
+			"ssl" => [
+				"verify_peer" => false,
+				"verify_peer_name" => false,
+			]
+		];
+		$data = file_get_contents($link, false, stream_context_create($stream_opts));
 		if(!is_string($data)){
 			$this->setResult(false);
 
