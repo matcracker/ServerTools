@@ -39,6 +39,7 @@ use function preg_match;
 use function rmdir;
 use function round;
 use function str_replace;
+use function strpos;
 use function unlink;
 
 final class Utils{
@@ -161,7 +162,7 @@ final class Utils{
 	}
 
 	public static function isValidUnixFileName(string $fileName) : bool{
-		return preg_match("/[\x00\/]/", $fileName) === 0;
+		return strpos($fileName, "\x00") === false && preg_match("/[\/]/", $fileName) === 0;
 	}
 
 	public static function getServerPath() : string{
