@@ -1,6 +1,6 @@
 [![](https://poggit.pmmp.io/shield.state/ServerTools)](https://poggit.pmmp.io/p/ServerTools)
 [![](https://poggit.pmmp.io/shield.dl.total/ServerTools)](https://poggit.pmmp.io/p/ServerTools)
-[![Discord](https://img.shields.io/discord/620519017148579841.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/eAePyeb)
+[![Discord](https://img.shields.io/discord/620519017148579841.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/Uf6U78g)
 
 # ServerTools
 ServerTools is PocketMine-MP plugin containing a set of tools that allows you to manage your server directly from the game!
