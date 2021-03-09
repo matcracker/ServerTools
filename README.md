@@ -81,3 +81,7 @@ It allows to search and download to your server a plugin from poggit website.
 **Permission (default OP):** _st.ui.restart_
 
 It simply restarts your server.
+
+## F.A.Q.
+1. **I get the message "You do not have permission to use this function" or similar, why?**
+- Some functions of the plugin are very dangerous if given to all the operators of your server, because they could cause irreparable damage. To avoid this, the plugin disables the use of these functions and to be enabled you need to use a third-party plugin for managing permissions (e.g. ![PurePerms](https://poggit.pmmp.io/p/PurePerms) or similar) and add to yourself or whoever you trust the permissions of the various features of you need. The permission of each feature can be found in the respective chapter.
