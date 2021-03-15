@@ -6,7 +6,7 @@ projects:
     path: ""
     icon: resources/servertools_logo.png
     libs:
-      - src: JackMD/UpdateNotifier/UpdateNotifier
+      - src: Ifera/UpdateNotifier/UpdateNotifier
         version: ~2.1.0
       - src: JackMD/ConfigUpdater/ConfigUpdater
         version: ~1.0.0
