@@ -26,18 +26,19 @@ namespace matcracker\ServerTools;
 use JackMD\ConfigUpdater\ConfigUpdater;
 use JackMD\UpdateNotifier\UpdateNotifier;
 use matcracker\ServerTools\commands\ServerToolsCommand;
-use matcracker\ServerTools\forms\FormManager;
 use matcracker\ServerTools\task\thread\RestartWindowsServer;
 use pocketmine\plugin\PluginBase;
+use pocketmine\plugin\PluginException;
 use pocketmine\utils\TextFormat;
 use pocketmine\utils\Utils;
 use function file_exists;
+use function pcntl_exec;
 use function register_shutdown_function;
 
 final class Main extends PluginBase{
 	private const CONFIG_VERSION = 1;
-	/** @var FormManager */
-	private $formManager;
+	/** @var Main|null */
+	private static $instance;
 
 	public static function formatMessage(string $message) : string{
 		return TextFormat::AQUA . "[ServerTools] " . TextFormat::RESET . $message;
@@ -50,14 +51,14 @@ final class Main extends PluginBase{
 			return false;
 		}
 
-		$this->getLogger()->notice("Restarting the server...");
+		$this->getLogger()->notice(self::formatMessage("Restarting the server..."));
 
 		if(Utils::getOS() === Utils::OS_WINDOWS){
-			new RestartWindowsServer($startFileName);
+			(new RestartWindowsServer($startFileName))->start();
 		}else{
 			register_shutdown_function(
-				static function() use ($startFileName): void{
-					pcntl_exec("./{$startFileName}");
+				static function() use ($startFileName) : void{
+					pcntl_exec("./$startFileName");
 				}
 			);
 		}
@@ -68,19 +69,28 @@ final class Main extends PluginBase{
 	}
 
 	public function onLoad() : void{
+		self::$instance = $this;
+
 		UpdateNotifier::checkUpdate($this->getName(), $this->getDescription()->getVersion());
 	}
 
 	public function onEnable() : void{
 		ConfigUpdater::checkUpdate($this, $this->getConfig(), "config-version", self::CONFIG_VERSION);
 
-		$this->getServer()->getCommandMap()->register('servertools', new ServerToolsCommand($this));
+		$this->getServer()->getCommandMap()->register("servertools", new ServerToolsCommand($this));
 		$this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
-		$this->formManager = new FormManager($this);
 	}
 
-	public function getFormManager() : FormManager{
-		return $this->formManager;
+	public function onDisable(){
+		self::$instance = null;
+	}
+
+	public static function getInstance() : Main{
+		if(self::$instance === null){
+			throw new PluginException("ServerTools instance could not be accessed because it is disabled or not loaded yet.");
+		}
+
+		return self::$instance;
 	}
 
 }

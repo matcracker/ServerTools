@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\commands;
 
+use matcracker\ServerTools\forms\FormManager;
 use matcracker\ServerTools\Main;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
@@ -59,7 +60,7 @@ final class ServerToolsCommand extends Command implements PluginIdentifiableComm
 			return false;
 		}
 
-		$sender->sendForm($this->plugin->getFormManager()->getMainMenu());
+		$sender->sendForm(FormManager::getMainMenu());
 
 		return true;
 	}

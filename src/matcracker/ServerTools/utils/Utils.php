@@ -100,7 +100,7 @@ final class Utils{
 	}
 
 	public static function removeAllFiles(string $path) : bool{
-		$fileList = glob("{$path}/*");
+		$fileList = glob("$path/*");
 		if($fileList === false){
 			return false;
 		}

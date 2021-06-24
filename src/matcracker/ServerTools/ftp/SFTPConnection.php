@@ -75,7 +75,7 @@ final class SFTPConnection extends FTPBase{
 			return false;
 		}
 
-		$remoteRes = @fopen("ssh2.sftp://{$connection}{$remoteFile}", 'wb');
+		$remoteRes = @fopen("ssh2.sftp://$connection$remoteFile", 'wb');
 		if($remoteRes === false){
 			return false;
 		}

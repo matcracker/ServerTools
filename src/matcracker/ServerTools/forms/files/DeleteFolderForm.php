@@ -18,14 +18,14 @@ final class DeleteFolderForm extends ModalForm{
 
 	public function __construct(string $folderPath, Player $player){
 		if(!is_dir($folderPath)){
-			throw new PluginException("The {$folderPath} must be a folder.");
+			throw new PluginException("The $folderPath must be a folder.");
 		}
 
 		parent::__construct(
 			function(Player $player, $data) use ($folderPath): void{
 				if($data){
 					if(!Utils::removeAllFiles($folderPath)){
-						$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not delete folder {$folderPath}."));
+						$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not delete folder $folderPath."));
 
 						return;
 					}
@@ -38,7 +38,7 @@ final class DeleteFolderForm extends ModalForm{
 			FormManager::onClose(new FileExplorerForm($folderPath, $player))
 		);
 		$this->setTitle("Confirm to delete folder.")
-			->setMessage("Are you sure to delete the folder {$folderPath} and all its contents?")
+			->setMessage("Are you sure to delete the folder $folderPath and all its contents?")
 			->setFirstButton("Yes")
 			->setSecondButton("No");
 	}

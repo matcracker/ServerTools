@@ -43,7 +43,7 @@ final class FileExplorerForm extends Form{
 
 	public function __construct(string $filePath, Player $player){
 		if(!is_dir($filePath)){
-			throw new PluginException("The {$filePath} must be a folder.");
+			throw new PluginException("The $filePath must be a folder.");
 		}
 
 		$fileList = Utils::getSortedFileList($filePath);

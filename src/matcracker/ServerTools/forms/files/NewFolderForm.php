@@ -20,7 +20,7 @@ final class NewFolderForm extends FileInputForm{
 
 	public function __construct(string $filePath, Player $player, ?string $error = null){
 		if(!is_dir($filePath)){
-			throw new PluginException("The {$filePath} must be a folder.");
+			throw new PluginException("The $filePath must be a folder.");
 		}
 
 		parent::__construct(
@@ -32,7 +32,7 @@ final class NewFolderForm extends FileInputForm{
 			function(Player $player, $data) use ($filePath): void{
 				$folderName = $data[self::FILE_NAME] ?? "";
 				if(strlen(trim($folderName)) === 0 || strpbrk($folderName, "\\/?%*:|\"<>") !== false){
-					$player->sendForm(new self($filePath, $player, "Invalid name \"{$folderName}\" for this folder. Try again."));
+					$player->sendForm(new self($filePath, $player, "Invalid name \"$folderName\" for this folder. Try again."));
 
 					return;
 				}

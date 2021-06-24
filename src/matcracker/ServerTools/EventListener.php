@@ -57,7 +57,7 @@ final class EventListener implements Listener{
 			$filePath = $namedTag->getCompoundTag("ServerTools")->getString("FilePath");
 			$fileName = basename($filePath);
 			if(!is_writable($filePath)){
-				$player->sendMessage(Main::formatMessage(TextFormat::RED . "The file \"{$fileName}\" does not exist or is not writable."));
+				$player->sendMessage(Main::formatMessage(TextFormat::RED . "The file \"$fileName\" does not exist or is not writable."));
 
 				return;
 			}
@@ -68,7 +68,7 @@ final class EventListener implements Listener{
 			}
 
 			if(file_put_contents($filePath, $newFileContent) === false){
-				$player->sendMessage(Main::formatMessage(TextFormat::RED . "Error while saving the new content of file \"{$fileName}\"."));
+				$player->sendMessage(Main::formatMessage(TextFormat::RED . "Error while saving the new content of file \"$fileName\"."));
 			}else{
 				$bookSlot = $player->getInventory()->getHeldItemIndex();
 				//Remove the book from the hotbar

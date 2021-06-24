@@ -18,14 +18,14 @@ final class DeleteFileForm extends ModalForm{
 
 	public function __construct(string $filePath, Player $player){
 		if(!is_file($filePath)){
-			throw new PluginException("The {$filePath} must be a file.");
+			throw new PluginException("The $filePath must be a file.");
 		}
 
 		parent::__construct(
 			function(Player $player, $data) use ($filePath): void{
 				if($data){
 					if(!unlink($filePath)){
-						$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not delete file {$filePath}."));
+						$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not delete file $filePath."));
 
 						return;
 					}
@@ -38,7 +38,7 @@ final class DeleteFileForm extends ModalForm{
 			FormManager::onClose(new FileExplorerForm(dirname($filePath), $player))
 		);
 		$this->setTitle("Confirm to delete file.")
-			->setMessage("Are you sure to delete the file {$filePath}?")
+			->setMessage("Are you sure to delete the file $filePath?")
 			->setFirstButton("Yes")
 			->setSecondButton("No");
 	}

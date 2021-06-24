@@ -38,14 +38,13 @@ final class RestartWindowsServer extends Thread{
 	public function __construct(string $fileName){
 		$this->fileName = $fileName;
 		if(($os = Utils::getOS()) !== Utils::OS_WINDOWS){
-			throw new InvalidStateException("Could not use this thread on {$os} OS");
+			throw new InvalidStateException("Could not use this thread on $os OS");
 		}
-		$this->start();
 	}
 
 	public function quit(){
 		parent::quit();
-		$res = proc_open("start cmd.exe /c \"timeout /t 5 & {$this->fileName}\"", [], $pipes);
+		$res = proc_open("start cmd.exe /c \"timeout /t 5 & $this->fileName\"", [], $pipes);
 		if(is_resource($res)){
 			proc_close($res);
 		}

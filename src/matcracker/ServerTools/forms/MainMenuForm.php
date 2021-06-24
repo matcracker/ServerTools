@@ -37,9 +37,9 @@ use pocketmine\utils\TextFormat;
 
 final class MainMenuForm extends Form{
 
-	public function __construct(Main $plugin){
+	public function __construct(){
 		parent::__construct(
-			function(Player $player, $data) use ($plugin): void{
+			function(Player $player, $data): void{
 				if(!$player->hasPermission("st.ui.{$data}")){
 					$player->sendMessage(Main::formatMessage(TextFormat::RED . "You do not have permission to use this function"));
 
@@ -73,7 +73,7 @@ final class MainMenuForm extends Form{
 						$player->sendForm(new SearchPluginForm());
 						break;
 					case "restart":
-						if(!$plugin->restartServer()){
+						if(!Main::getInstance()->restartServer()){
 							$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not restart the server."));
 						}
 

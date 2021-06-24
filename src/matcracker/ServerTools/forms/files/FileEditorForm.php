@@ -82,14 +82,14 @@ final class FileEditorForm extends Form{
 
 	public function __construct(string $filePath, Player $player){
 		if(!is_file($filePath)){
-			throw new PluginException("The {$filePath} must be a file.");
+			throw new PluginException("The $filePath must be a file.");
 		}
 
 		$fileName = basename($filePath);
 		parent::__construct(
 			static function(Player $player, $data) use ($filePath, $fileName){
 				if(!is_readable($filePath)){
-					$player->sendMessage(Main::formatMessage(TextFormat::RED . "The file \"{$fileName}\" does not exist or is not readable."));
+					$player->sendMessage(Main::formatMessage(TextFormat::RED . "The file \"$fileName\" does not exist or is not readable."));
 
 					return;
 				}
@@ -134,7 +134,7 @@ final class FileEditorForm extends Form{
 						}
 
 						if(!fclose($fileResource)){
-							$player->sendMessage(Main::formatMessage(TextFormat::RED . "Cannot close the file stream of {$fileName}"));
+							$player->sendMessage(Main::formatMessage(TextFormat::RED . "Cannot close the file stream of $fileName"));
 
 							return;
 						}
@@ -145,7 +145,7 @@ final class FileEditorForm extends Form{
 
 						$player->getInventory()->setItemInHand($book);
 					}else{
-						$player->sendMessage(Main::formatMessage(TextFormat::RED . "Cannot open the file stream of {$fileName}"));
+						$player->sendMessage(Main::formatMessage(TextFormat::RED . "Cannot open the file stream of $fileName"));
 					}
 				}
 			},
@@ -155,13 +155,13 @@ final class FileEditorForm extends Form{
 		$this->setTitle("File Editor");
 
 		if(!is_readable($filePath)){
-			$this->setMessage(TextFormat::RED . "The file \"{$fileName}\" does not exist or is not readable.");
+			$this->setMessage(TextFormat::RED . "The file \"$fileName\" does not exist or is not readable.");
 
 			return;
 		}
 
 		$fileInfoMessage =
-			"Name: {$fileName}" . TextFormat::EOL .
+			"Name: $fileName" . TextFormat::EOL .
 			"Size: " . Utils::bytesToHuman(filesize($filePath));
 
 		$this->setMessage($fileInfoMessage);

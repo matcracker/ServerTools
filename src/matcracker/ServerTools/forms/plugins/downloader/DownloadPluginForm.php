@@ -71,12 +71,12 @@ final class DownloadPluginForm extends CustomForm{
 			FormManager::onClose(new SearchResultsForm(SearchResultsForm::getResultsCache($playerName)))
 		);
 
-		$this->setTitle("{$pluginName} Information")
+		$this->setTitle("$pluginName Information")
 			->addLabel(TextFormat::BOLD . $firstInfo->getShortDescription())
 			->addLabel("Author(s): " . $firstInfo->getAuthors())
 			->addLabel("License: " . mb_strtoupper($firstInfo->getLicense()))
 			->addDropdown("Select the version", $versions, null, self::SELECTED_VERSION)
-			->addLabel(TextFormat::BOLD . TextFormat::GOLD . "Server API version: {$serverApi}")
+			->addLabel(TextFormat::BOLD . TextFormat::GOLD . "Server API version: $serverApi")
 			->addLabel("Press \"Submit\" to start the download.");
 	}
 

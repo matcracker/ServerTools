@@ -48,8 +48,8 @@ final class PluginLoaderForm extends Form{
 				}
 
 				$pluginMng->enablePlugin($plugin);
-				foreach(Server::getInstance()->getOnlinePlayers() as $player){
-					$player->sendCommandData();
+				foreach(Server::getInstance()->getOnlinePlayers() as $p){
+					$p->sendCommandData();
 				}
 
 				$player->sendMessage(Main::formatMessage(TextFormat::GREEN . "{$plugin->getName()} successfully loaded and enabled. Check console for eventual errors."));
