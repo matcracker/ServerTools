@@ -47,7 +47,7 @@ final class PluginEnablerForm extends Form{
 				}
 
 				$plugin = $plugins[$data];
-				if($en = $plugin->isEnabled()){
+				if($plugin->isEnabled()){
 					$pluginManager->disablePlugin($plugin);
 					$player->sendMessage(Main::formatMessage(TextFormat::RED . "The plugin {$plugin->getName()} has been disabled."));
 				}else{
@@ -66,7 +66,7 @@ final class PluginEnablerForm extends Form{
 
 		foreach($plugins as $plugin){
 			$version = $plugin->getDescription()->getVersion();
-			$this->addClassicButton(($plugin->isEnabled() ? TextFormat::DARK_GREEN : TextFormat::RED) . "{$plugin->getName()} v{$version}");
+			$this->addClassicButton(($plugin->isEnabled() ? TextFormat::DARK_GREEN : TextFormat::RED) . "{$plugin->getName()} v$version");
 		}
 	}
 }

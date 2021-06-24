@@ -93,6 +93,6 @@ final class PluginInfo{
 	}
 
 	public function getDownloadLink() : string{
-		return "{$this->artifactUrl}/{$this->pluginName}.phar";
+		return "$this->artifactUrl/$this->pluginName.phar";
 	}
 }
