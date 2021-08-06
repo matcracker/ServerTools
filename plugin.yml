@@ -1,7 +1,7 @@
 ---
 name: ServerTools
 main: matcracker\ServerTools\Main
-version: 0.3.1
+version: 0.3.2
 api: 3.0.0
 
 load: POSTWORLD

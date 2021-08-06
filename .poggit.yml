@@ -6,9 +6,9 @@ projects:
     path: ""
     icon: resources/servertools_logo.png
     libs:
-      - src: JackMD/UpdateNotifier/UpdateNotifier
+      - src: ifera-mc/UpdateNotifier/UpdateNotifier
         version: ~2.1.0
-      - src: Ifera/ConfigUpdater/ConfigUpdater
+      - src: ifera-mc/ConfigUpdater/ConfigUpdater
         version: ~1.2.0
       - src: matcracker/FormLib/FormLib
         version: ~1.2.0
