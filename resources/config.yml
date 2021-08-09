@@ -1,6 +1,6 @@
 ---
 # DON'T EDIT THE CONFIG VERSION VALUE!
-config-version: 1
+config-version: 2
 
 # Restart configuration
 # Put the executable file name to start the server.
@@ -9,4 +9,13 @@ config-version: 1
 # - Other platform should be "start.sh"
 restart:
   file-name: "start.sh"
+
+# Settings related to Poggit Plugin Downloader
+poggit:
+  # Maximum time (in seconds) allowed to fetch the plugins list from Poggit.
+  # Increase this parameter if your internet speed is slow.
+  timeout: 30
+  # ServerTools saves the plugins list from Poggit to permit the next time a fast search.
+  # This parameter allow to save the plugin list after 24 hours.
+  invalidate-cache: 24
 ...

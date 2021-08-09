@@ -24,48 +24,35 @@ declare(strict_types=1);
 namespace matcracker\ServerTools\task\async;
 
 use matcracker\ServerTools\Main;
-use matcracker\ServerTools\utils\PluginInfo;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
+use pocketmine\utils\Internet;
 use pocketmine\utils\TextFormat;
-use function basename;
-use function file_get_contents;
 use function file_put_contents;
-use function is_string;
-use function stream_context_create;
 
 final class DownloadPluginTask extends AsyncTask{
+	private string $pluginName;
+	private string $artifactUrl;
+	private string $playerName;
+	private string $pluginPath;
+	private int $timeout;
 
-	/** @var string */
-	private $playerName;
-	/** @var string */
-	private $pluginPath;
-	/** @var PluginInfo */
-	private $pluginInfo;
-
-	public function __construct(string $playerName, string $pluginPath, PluginInfo $pluginInfo){
+	public function __construct(string $pluginName, string $artifactUrl, string $playerName, string $pluginPath){
+		$this->pluginName = $pluginName;
+		$this->artifactUrl = $artifactUrl;
 		$this->playerName = $playerName;
 		$this->pluginPath = $pluginPath;
-		$this->pluginInfo = $pluginInfo;
+		$this->timeout = (int) Main::getInstance()->getConfig()->getNested("poggit.timeout", 30);
 	}
 
 	public function onRun() : void{
-		$link = $this->pluginInfo->getDownloadLink();
+		$pharData = Internet::getURL("$this->artifactUrl/$this->pluginName.phar", $this->timeout);
 
-		static $stream_opts = [
-			"ssl" => [
-				"verify_peer" => false,
-				"verify_peer_name" => false,
-			]
-		];
-		$data = file_get_contents($link, false, stream_context_create($stream_opts));
-		if(!is_string($data)){
+		if($pharData !== false){
+			$this->setResult(file_put_contents($this->pluginPath . $this->pluginName . ".phar", $pharData) !== false);
+		}else{
 			$this->setResult(false);
-
-			return;
 		}
-		$path = $this->pluginPath . basename($link);
-		$this->setResult(file_put_contents($path, $data) !== false);
 	}
 
 	public function onCompletion(Server $server) : void{
@@ -74,14 +61,12 @@ final class DownloadPluginTask extends AsyncTask{
 			return;
 		}
 
-		$pluginName = $this->pluginInfo->getPluginName();
-
 		/** @var bool $success */
 		$success = $this->getResult();
 		if($success){
-			$player->sendMessage(Main::formatMessage(TextFormat::GREEN . "{$pluginName} successfully downloaded."));
+			$player->sendMessage(Main::formatMessage(TextFormat::GREEN . "$this->pluginName successfully downloaded."));
 		}else{
-			$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not download {$pluginName} plugin."));
+			$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not download $this->pluginName plugin."));
 		}
 	}
 }

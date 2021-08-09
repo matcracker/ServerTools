@@ -25,72 +25,48 @@ namespace matcracker\ServerTools\task\async;
 
 use matcracker\ServerTools\forms\plugins\downloader\SearchPluginForm;
 use matcracker\ServerTools\forms\plugins\downloader\SearchResultsForm;
-use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
-use pocketmine\utils\Internet;
+use function array_filter;
 use function count;
-use function explode;
 use function mb_strtolower;
+use function mb_substr;
 use function strlen;
 use function strpos;
-use function substr;
+use const ARRAY_FILTER_USE_BOTH;
 
-final class SearchPluginTask extends AsyncTask{
+final class SearchPluginTask extends GetPoggitReleases{
 
-	private const POGGIT_RELEASES_URL = "https://poggit.pmmp.io/releases.min.json";
-	/** @var string */
-	private $nameToSearch;
-	/** @var string */
-	private $playerName;
+	private string $nameToSearch;
+	private string $playerName;
 
 	public function __construct(string $nameToSearch, string $playerName){
+		parent::__construct();
 		$this->nameToSearch = $nameToSearch;
 		$this->playerName = $playerName;
 	}
 
 	public function onRun() : void{
-		$json = Internet::getURL(self::POGGIT_RELEASES_URL);
+		parent::onRun();
+		/** @var array $poggitJson */
+		$poggitJson = $this->worker->getFromThreadStore(self::POGGIT_JSON_ID);
 
-		$results = [];
-		if($json !== false){
-			$poggitJson = json_decode($json, true);
-			if(is_array($poggitJson)){
-				$emptyInputSearch = strlen($this->nameToSearch) === 0;
-				$searchByAuthor = false;
-				$searchedAuthor = "";
-
-				if(!$emptyInputSearch){
-					$searchByAuthor = substr($this->nameToSearch, 0, 1) === "@";
-					$searchedAuthor = mb_strtolower(substr($this->nameToSearch, 1));
-					$searchByAuthor = $searchByAuthor && strlen($searchedAuthor) > 0;
-				}
-
-				$prevName = "";
-				foreach($poggitJson as $jsonData){
-					$pluginName = $jsonData["name"];
-
-					if($prevName === $pluginName){ //Because the list is sorted alphabetically.
-						continue;
+		if(strlen($this->nameToSearch) > 0){
+			$result = array_filter(
+				$poggitJson,
+				function(array $data, string $pluginName) : bool{
+					//Search by author
+					if(mb_substr($this->nameToSearch, 0, 1) === "@"){
+						return mb_strtolower($data["authors"]) === mb_strtolower(mb_substr($this->nameToSearch, 1));
+					}else{
+						return strpos(mb_strtolower($pluginName), mb_strtolower($this->nameToSearch)) !== false;
 					}
-					$prevName = $pluginName;
-					$authorName = mb_strtolower(explode("/", $jsonData["repo_name"])[0]);
-
-					if
-					(
-						$emptyInputSearch ||
-						($searchByAuthor && strpos($authorName, $searchedAuthor) !== false) ||
-						strpos(mb_strtolower($pluginName), mb_strtolower($this->nameToSearch)) !== false
-					){
-						$results[] = [
-							"name" => $pluginName,
-							"url" => $jsonData["icon_url"] ?? ""
-						];
-					}
-				}
-			}
+				},
+				ARRAY_FILTER_USE_BOTH);
+		}else{
+			$result = $poggitJson;
 		}
 
-		$this->setResult($results);
+		$this->setResult($result);
 	}
 
 	public function onCompletion(Server $server) : void{
@@ -103,10 +79,8 @@ final class SearchPluginTask extends AsyncTask{
 		$results = $this->getResult();
 		if(count($results) === 0){
 			$player->sendForm(new SearchPluginForm($this->nameToSearch));
-
-			return;
+		}else{
+			$player->sendForm(new SearchResultsForm($results));
 		}
-
-		$player->sendForm(new SearchResultsForm($results));
 	}
 }

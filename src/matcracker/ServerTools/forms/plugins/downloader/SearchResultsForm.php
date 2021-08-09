@@ -25,10 +25,8 @@ namespace matcracker\ServerTools\forms\plugins\downloader;
 
 use matcracker\FormLib\Form;
 use matcracker\ServerTools\forms\FormManager;
-use matcracker\ServerTools\task\async\GetPluginInfoTask;
 use pocketmine\Player;
 use pocketmine\plugin\PluginException;
-use pocketmine\Server;
 use function array_key_exists;
 use function count;
 
@@ -36,23 +34,16 @@ final class SearchResultsForm extends Form{
 
 	private static $resultsCache = [];
 
-	/**
-	 * SearchResultsForm constructor.
-	 *
-	 * @param string[][] $results
-	 */
 	public function __construct(array $results){
 		parent::__construct(
 			function(Player $player, $data) use ($results){
-				if(!array_key_exists((int) $data, $results)){
+				if(!array_key_exists($data, $results)){
 					throw new PluginException();
 				}
 
 				self::$resultsCache[$player->getName()] = $results;
 
-				Server::getInstance()->getAsyncPool()->submitTask(
-					new GetPluginInfoTask($results[$data]["name"], $player->getName())
-				);
+				$player->sendForm(new DownloadPluginForm($results[$data], $player->getName()));
 			},
 			FormManager::onClose(new SearchPluginForm())
 		);
@@ -60,8 +51,8 @@ final class SearchResultsForm extends Form{
 		$this->setTitle(count($results) . " Poggit Result(s)")
 			->setMessage("Select a plugin:");
 
-		foreach($results as $result){
-			$this->addWebImageButton($result["name"], $result["url"]);
+		foreach($results as $pluginName => $data){
+			$this->addWebImageButton($pluginName, $data["icon_url"], $pluginName);
 		}
 	}
 
