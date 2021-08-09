@@ -18,4 +18,14 @@ poggit:
   # ServerTools saves the plugins list from Poggit to permit the next time a fast search.
   # This parameter allow to save the plugin list after 24 hours.
   invalidate-cache: 24
+
+# =========== WARNING ===========
+# Some functions of the plugin are very dangerous if given to all the operators of your server,
+# because they could cause irreparable damage. To avoid this, the plugin disables the use of
+# these functions and to be enabled you need to use a third-party plugin
+# for managing permissions (e.g. PurePerms or similar) and add to yourself or whoever you trust
+# the permissions of the various features of you need.
+# However, at your own risk, enabling the underlying setting will allow all operators
+# to be able to use the plugin functions.
+op-bypass-permissions: false
 ...

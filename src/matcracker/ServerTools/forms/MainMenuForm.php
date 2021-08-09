@@ -39,8 +39,9 @@ final class MainMenuForm extends Form{
 
 	public function __construct(){
 		parent::__construct(
-			function(Player $player, $data): void{
-				if(!$player->hasPermission("st.ui.{$data}")){
+			function(Player $player, $data) : void{
+				$opBypassPermissions = $player->isOp() && (bool) Main::getInstance()->getConfig()->get("op-bypass-permissions", false);
+				if(!$player->hasPermission("st.ui.$data") && !$opBypassPermissions){
 					$player->sendMessage(Main::formatMessage(TextFormat::RED . "You do not have permission to use this function"));
 
 					return;
@@ -79,8 +80,7 @@ final class MainMenuForm extends Form{
 
 						break;
 				}
-			},
-			null
+			}
 		);
 		$this->setTitle("Server Tools")
 			->addClassicButton("File Explorer", "file-explorer")

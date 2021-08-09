@@ -36,7 +36,7 @@ use function pcntl_exec;
 use function register_shutdown_function;
 
 final class Main extends PluginBase{
-	private const CONFIG_VERSION = 1;
+	private const CONFIG_VERSION = 2;
 	/** @var Main|null */
 	private static $instance;
 
