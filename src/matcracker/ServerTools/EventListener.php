@@ -38,7 +38,7 @@ use function is_writable;
 
 final class EventListener implements Listener{
 
-	private $plugin;
+	private Main $plugin;
 
 	public function __construct(Main $plugin){
 		$this->plugin = $plugin;
@@ -74,7 +74,7 @@ final class EventListener implements Listener{
 				//Remove the book from the hotbar
 				$this->plugin->getScheduler()->scheduleDelayedTask(
 					new ClosureTask(
-						function(int $currentTick) use ($player, $bookSlot): void{
+						function(int $currentTick) use ($player, $bookSlot) : void{
 							if($player !== null){
 								$book = $player->getInventory()->getHotbarSlotItem($bookSlot);
 								if($book instanceof WrittenBook){

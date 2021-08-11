@@ -29,7 +29,7 @@ final class NewFileForm extends FileInputForm{
 			"e.g. MyFile.txt",
 			null,
 			$error,
-			function(Player $player, $data) use ($filePath): void{
+			function(Player $player, $data) use ($filePath) : void{
 				$fileName = $data[self::FILE_NAME] ?? "";
 				if(strlen(trim($fileName)) === 0 || !Utils::isValidFileName($fileName)){
 					$player->sendForm(new self($filePath, $player, "Invalid name \"$fileName\" for this folder. Try again"));

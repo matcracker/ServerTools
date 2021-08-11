@@ -37,11 +37,14 @@ use function register_shutdown_function;
 
 final class Main extends PluginBase{
 	private const CONFIG_VERSION = 2;
-	/** @var Main|null */
-	private static $instance;
+	private static ?Main $instance;
 
-	public static function formatMessage(string $message) : string{
-		return TextFormat::AQUA . "[ServerTools] " . TextFormat::RESET . $message;
+	public static function getInstance() : Main{
+		if(self::$instance === null){
+			throw new PluginException("ServerTools instance could not be accessed because it is disabled or not loaded yet.");
+		}
+
+		return self::$instance;
 	}
 
 	public function restartServer() : bool{
@@ -68,6 +71,10 @@ final class Main extends PluginBase{
 		return true;
 	}
 
+	public static function formatMessage(string $message) : string{
+		return TextFormat::AQUA . "[ServerTools] " . TextFormat::RESET . $message;
+	}
+
 	public function onLoad() : void{
 		self::$instance = $this;
 
@@ -83,14 +90,6 @@ final class Main extends PluginBase{
 
 	public function onDisable(){
 		self::$instance = null;
-	}
-
-	public static function getInstance() : Main{
-		if(self::$instance === null){
-			throw new PluginException("ServerTools instance could not be accessed because it is disabled or not loaded yet.");
-		}
-
-		return self::$instance;
 	}
 
 }

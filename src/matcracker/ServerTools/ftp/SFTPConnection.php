@@ -65,8 +65,8 @@ final class SFTPConnection extends FTPBase{
 		return ssh2_sftp($ftpConn);
 	}
 
-	public function putDirectory($connection, string $remoteDir, int $mode = 0644) : bool{
-		return @ssh2_sftp_mkdir($connection, $remoteDir, $mode);
+	public function putDirectory($connection, string $remoteDirPath, int $mode = 0644) : bool{
+		return @ssh2_sftp_mkdir($connection, $remoteDirPath, $mode);
 	}
 
 	public function putFile($connection, string $localFile, string $remoteFile, int $mode = 0644) : bool{
@@ -89,8 +89,6 @@ final class SFTPConnection extends FTPBase{
 
 	/**
 	 * @param resource $connection
-	 *
-	 * @return bool
 	 */
 	public function disconnect($connection) : bool{
 		return @ssh2_disconnect($connection);

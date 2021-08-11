@@ -22,7 +22,7 @@ final class DeleteFolderForm extends ModalForm{
 		}
 
 		parent::__construct(
-			function(Player $player, $data) use ($folderPath): void{
+			function(Player $player, $data) use ($folderPath) : void{
 				if($data){
 					if(!Utils::removeAllFiles($folderPath)){
 						$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not delete folder $folderPath."));

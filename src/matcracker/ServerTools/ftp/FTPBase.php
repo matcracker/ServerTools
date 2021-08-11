@@ -32,11 +32,11 @@ abstract class FTPBase{
 	public const ERR_DISCONNECT = -2;
 	public const ERR_LOGIN = -3;
 
-	protected $host;
-	protected $port;
-	protected $username;
-	protected $password;
-	protected $remoteHomePath;
+	protected string $host;
+	protected int $port;
+	protected string $username;
+	protected string $password;
+	protected string $remoteHomePath;
 
 	public function __construct(string $host, int $port, string $username, string $password, string $remoteHomePath){
 		$this->host = $host;
@@ -54,51 +54,36 @@ abstract class FTPBase{
 
 	/**
 	 * @param resource $connection
-	 *
-	 * @return bool
 	 */
 	public abstract function disconnect($connection) : bool;
 
 	public abstract function putFile($connection, string $localFile, string $remoteFile, int $mode = 0644) : bool;
 
-	public abstract function putDirectory($connection, string $remotePath, int $mode = 0644) : bool;
+	public abstract function putDirectory($connection, string $remoteDirPath, int $mode = 0644) : bool;
 
-	/**
-	 * @return string
-	 */
 	public final function getHost() : string{
 		return $this->host;
 	}
 
-	/**
-	 * @return int
-	 */
 	public final function getPort() : int{
 		return $this->port;
 	}
 
-	/**
-	 * @return string
-	 */
 	public final function getHomePath() : string{
 		return $this->remoteHomePath;
 	}
 
 	/**
 	 * Produces a human-readable output without leaking password
-	 *
-	 * @return string
 	 */
 	public final function __toString() : string{
 		return "$this->username@$this->host:$this->port";
 	}
-
+	
 	/**
 	 * Prepares value to be var_dump()'ed without leaking password
-	 *
-	 * @return array
 	 */
-	public final function __debugInfo(){
+	public final function __debugInfo() : array{
 		return [
 			"host" => $this->host,
 			"port" => $this->port,

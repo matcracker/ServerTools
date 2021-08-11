@@ -32,8 +32,7 @@ use function proc_open;
 
 final class RestartWindowsServer extends Thread{
 
-	/** @var string */
-	private $fileName;
+	private string $fileName;
 
 	public function __construct(string $fileName){
 		$this->fileName = $fileName;

@@ -32,7 +32,7 @@ use function count;
 
 final class SearchResultsForm extends Form{
 
-	private static $resultsCache = [];
+	private static array $resultsCache = [];
 
 	public function __construct(array $results){
 		parent::__construct(

@@ -33,8 +33,7 @@ use function ftp_ssl_connect;
 use function is_resource;
 
 final class FTPConnection extends FTPBase{
-  	/** @var bool */
-	private $ssl;
+	private bool $ssl;
 
 	public function __construct(string $host, int $port, string $username, string $password, string $remoteHomePath, bool $ssl){
 		parent::__construct($host, $port, $username, $password, $remoteHomePath);
@@ -70,9 +69,9 @@ final class FTPConnection extends FTPBase{
 		return $ftpConn;
 	}
 
-	public function putDirectory($connection, string $remotePath, int $mode = 0644) : bool{
-		if(!@ftp_chdir($connection, $remotePath)){
-			return ftp_mkdir($connection, $remotePath) !== false;
+	public function putDirectory($connection, string $remoteDirPath, int $mode = 0644) : bool{
+		if(!@ftp_chdir($connection, $remoteDirPath)){
+			return ftp_mkdir($connection, $remoteDirPath) !== false;
 		}
 
 		return true;
@@ -84,8 +83,6 @@ final class FTPConnection extends FTPBase{
 
 	/**
 	 * @param resource $connection
-	 *
-	 * @return bool
 	 */
 	public function disconnect($connection) : bool{
 		return ftp_close($connection);

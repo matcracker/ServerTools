@@ -39,7 +39,7 @@ final class PluginEnablerForm extends Form{
 		$plugins = array_values($pluginManager->getPlugins());
 
 		parent::__construct(
-			static function(Player $player, $data) use ($pluginManager, $plugins): void{
+			static function(Player $player, $data) use ($pluginManager, $plugins) : void{
 				if(!array_key_exists((int) $data, $plugins)){
 					$player->sendMessage(Main::formatMessage(TextFormat::RED . "Plugin does not exist."));
 

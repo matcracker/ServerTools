@@ -33,9 +33,7 @@ use pocketmine\plugin\Plugin;
 use pocketmine\utils\TextFormat;
 
 final class ServerToolsCommand extends Command implements PluginIdentifiableCommand{
-
-	/** @var Main */
-	private $plugin;
+	private Main $plugin;
 
 	public function __construct(Main $plugin){
 		parent::__construct(

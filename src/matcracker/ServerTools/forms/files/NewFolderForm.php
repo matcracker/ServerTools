@@ -29,7 +29,7 @@ final class NewFolderForm extends FileInputForm{
 			"e.g. MyFolder",
 			null,
 			$error,
-			function(Player $player, $data) use ($filePath): void{
+			function(Player $player, $data) use ($filePath) : void{
 				$folderName = $data[self::FILE_NAME] ?? "";
 				if(strlen(trim($folderName)) === 0 || strpbrk($folderName, "\\/?%*:|\"<>") !== false){
 					$player->sendForm(new self($filePath, $player, "Invalid name \"$folderName\" for this folder. Try again."));

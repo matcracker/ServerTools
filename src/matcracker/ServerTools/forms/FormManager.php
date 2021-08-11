@@ -27,15 +27,14 @@ use Closure;
 use matcracker\FormLib\BaseForm;
 use matcracker\FormLib\Form;
 use matcracker\FormLib\ModalForm;
-use matcracker\ServerTools\Main;
 use pocketmine\Player;
 
 final class FormManager{
 	public const BACK_LABEL = "/back";
 
 	private function __construct(){
-	    //NOOP
-    }
+		//NOOP
+	}
 
 	final public static function getConfirmForm(string $title, string $message, ?Closure $onClose = null) : Form{
 		return (new Form(

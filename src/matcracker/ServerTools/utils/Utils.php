@@ -198,7 +198,7 @@ final class Utils{
 		return new RecursiveIteratorIterator(
 			new RecursiveCallbackFilterIterator(
 				new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS),
-				static function(SplFileInfo $file, $key, RecursiveDirectoryIterator $iterator) use ($filter): bool{
+				static function(SplFileInfo $file, $key, RecursiveDirectoryIterator $iterator) use ($filter) : bool{
 					if($iterator->hasChildren() && !in_array($file->getFilename(), $filter)){
 						return true;
 					}

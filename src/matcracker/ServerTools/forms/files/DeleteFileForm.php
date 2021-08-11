@@ -22,7 +22,7 @@ final class DeleteFileForm extends ModalForm{
 		}
 
 		parent::__construct(
-			function(Player $player, $data) use ($filePath): void{
+			function(Player $player, $data) use ($filePath) : void{
 				if($data){
 					if(!unlink($filePath)){
 						$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not delete file $filePath."));
