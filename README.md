@@ -3,7 +3,7 @@
 [![Discord](https://img.shields.io/discord/620519017148579841.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/Uf6U78g)
 
 # ServerTools
-ServerTools is PocketMine-MP plugin containing a set of tools that allows you to manage your server directly from the game!
+ServerTools is a PocketMine-MP plugin containing a set of tools that allows you to manage your server directly from the game!
 
 ## Features
 - File Explorer
