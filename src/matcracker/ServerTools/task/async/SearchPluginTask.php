@@ -36,13 +36,9 @@ use const ARRAY_FILTER_USE_BOTH;
 
 final class SearchPluginTask extends GetPoggitReleases{
 
-	private string $nameToSearch;
-	private string $playerName;
 
-	public function __construct(string $nameToSearch, string $playerName){
+	public function __construct(private string $nameToSearch, private string $playerName){
 		parent::__construct();
-		$this->nameToSearch = $nameToSearch;
-		$this->playerName = $playerName;
 	}
 
 	public function onRun() : void{
@@ -58,7 +54,7 @@ final class SearchPluginTask extends GetPoggitReleases{
 					if(mb_substr($this->nameToSearch, 0, 1) === "@"){
 						return mb_strtolower($data["authors"]) === mb_strtolower(mb_substr($this->nameToSearch, 1));
 					}else{
-						return strpos(mb_strtolower($pluginName), mb_strtolower($this->nameToSearch)) !== false;
+						return str_contains(mb_strtolower($pluginName), mb_strtolower($this->nameToSearch));
 					}
 				},
 				ARRAY_FILTER_USE_BOTH);
@@ -69,8 +65,8 @@ final class SearchPluginTask extends GetPoggitReleases{
 		$this->setResult($result);
 	}
 
-	public function onCompletion(Server $server) : void{
-		$player = Server::getInstance()->getPlayer($this->playerName);
+	public function onCompletion() : void{
+		$player = Server::getInstance()->getPlayerExact($this->playerName);
 		if($player === null){
 			return;
 		}

@@ -26,15 +26,14 @@ namespace matcracker\ServerTools;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerEditBookEvent;
 use pocketmine\item\ItemFactory;
-use pocketmine\item\ItemIds;
 use pocketmine\item\WrittenBook;
-use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\utils\TextFormat;
 use function basename;
 use function count;
 use function file_put_contents;
 use function is_writable;
+use function var_dump;
 
 final class EventListener implements Listener{
 
@@ -47,14 +46,15 @@ final class EventListener implements Listener{
 	public function onPlayerEditBook(PlayerEditBookEvent $event) : void{
 		$player = $event->getPlayer();
 		$newBook = $event->getNewBook();
-		$namedTag = $newBook->getNamedTag();
 
-		if(!$namedTag->hasTag("ServerTools", CompoundTag::class)){
+
+		$filePath = $newBook->getNamedTag()->getString("ServerTools_FilePath", "null");
+
+		if($filePath === "null"){
 			return;
 		}
 
 		if($event->getAction() === PlayerEditBookEvent::ACTION_SIGN_BOOK){
-			$filePath = $namedTag->getCompoundTag("ServerTools")->getString("FilePath");
 			$fileName = basename($filePath);
 			if(!is_writable($filePath)){
 				$player->sendMessage(Main::formatMessage(TextFormat::RED . "The file \"$fileName\" does not exist or is not writable."));
@@ -74,11 +74,11 @@ final class EventListener implements Listener{
 				//Remove the book from the hotbar
 				$this->plugin->getScheduler()->scheduleDelayedTask(
 					new ClosureTask(
-						function(int $currentTick) use ($player, $bookSlot) : void{
+						static function() use ($player, $bookSlot) : void{
 							if($player !== null){
 								$book = $player->getInventory()->getHotbarSlotItem($bookSlot);
 								if($book instanceof WrittenBook){
-									$player->getInventory()->setItem($bookSlot, ItemFactory::get(ItemIds::AIR));
+									$player->getInventory()->setItem($bookSlot, ItemFactory::air());
 								}
 							}
 						}

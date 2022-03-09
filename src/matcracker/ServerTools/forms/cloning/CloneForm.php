@@ -28,7 +28,7 @@ use matcracker\FormLib\Form;
 use matcracker\ServerTools\forms\FormManager;
 use matcracker\ServerTools\ftp\FTPConnection;
 use matcracker\ServerTools\ftp\SFTPConnection;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use UnexpectedValueException;
 use function is_int;
 

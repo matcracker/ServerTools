@@ -25,7 +25,7 @@ namespace matcracker\ServerTools\forms\plugins\downloader;
 
 use matcracker\FormLib\Form;
 use matcracker\ServerTools\forms\FormManager;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\plugin\PluginException;
 use function array_key_exists;
 use function count;

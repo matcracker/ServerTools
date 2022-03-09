@@ -24,6 +24,9 @@ declare(strict_types=1);
 namespace matcracker\ServerTools\utils;
 
 use DirectoryIterator;
+use FilesystemIterator;
+use matcracker\ServerTools\Main;
+use pocketmine\player\Player;
 use pocketmine\Server;
 use pocketmine\utils\Utils as PMUtils;
 use RecursiveCallbackFilterIterator;
@@ -39,7 +42,6 @@ use function preg_match;
 use function rmdir;
 use function round;
 use function str_replace;
-use function strpos;
 use function unlink;
 
 final class Utils{
@@ -162,7 +164,7 @@ final class Utils{
 	}
 
 	public static function isValidUnixFileName(string $fileName) : bool{
-		return strpos($fileName, "\x00") === false && preg_match("/[\/]/", $fileName) === 0;
+		return !str_contains($fileName, "\x00") && preg_match("/[\/]/", $fileName) === 0;
 	}
 
 	public static function getServerPath() : string{
@@ -197,7 +199,7 @@ final class Utils{
 	public static function getRecursiveIterator(string $path, array $filter) : RecursiveIteratorIterator{
 		return new RecursiveIteratorIterator(
 			new RecursiveCallbackFilterIterator(
-				new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS),
+				new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
 				static function(SplFileInfo $file, $key, RecursiveDirectoryIterator $iterator) use ($filter) : bool{
 					if($iterator->hasChildren() && !in_array($file->getFilename(), $filter)){
 						return true;
@@ -208,4 +210,11 @@ final class Utils{
 			), RecursiveIteratorIterator::SELF_FIRST
 		);
 	}
+
+	public static function canBypassPermission(Player $player) : bool{
+		$isOp = Server::getInstance()->isOp($player->getName());
+
+		return $isOp && (bool) Main::getInstance()->getConfig()->get("op-bypass-permissions", false);
+	}
+
 }

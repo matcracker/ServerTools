@@ -27,7 +27,7 @@ use Closure;
 use matcracker\FormLib\BaseForm;
 use matcracker\FormLib\Form;
 use matcracker\FormLib\ModalForm;
-use pocketmine\Player;
+use pocketmine\player\Player;
 
 final class FormManager{
 	public const BACK_LABEL = "/back";

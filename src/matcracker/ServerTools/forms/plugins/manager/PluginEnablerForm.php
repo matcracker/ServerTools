@@ -26,7 +26,7 @@ namespace matcracker\ServerTools\forms\plugins\manager;
 use matcracker\FormLib\Form;
 use matcracker\ServerTools\forms\FormManager;
 use matcracker\ServerTools\Main;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use function array_key_exists;

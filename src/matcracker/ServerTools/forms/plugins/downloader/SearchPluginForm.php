@@ -26,7 +26,7 @@ namespace matcracker\ServerTools\forms\plugins\downloader;
 use matcracker\FormLib\CustomForm;
 use matcracker\ServerTools\forms\FormManager;
 use matcracker\ServerTools\task\async\SearchPluginTask;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use function array_rand;

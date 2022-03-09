@@ -26,7 +26,7 @@ namespace matcracker\ServerTools\forms\files;
 use matcracker\FormLib\Form;
 use matcracker\ServerTools\forms\FormManager;
 use matcracker\ServerTools\utils\Utils;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\plugin\PluginException;
 use pocketmine\utils\TextFormat;
 use function count;
@@ -83,7 +83,7 @@ final class FileExplorerForm extends Form{
 			return;
 		}
 
-		$hasPermission = $player->hasPermission("st.ui.file-explorer.write");
+		$hasPermission = $player->hasPermission("st.ui.file-explorer.write") || Utils::canBypassPermission($player);
 		if($filePath !== Utils::getServerPath()){
 			$this->addLocalImageButton("Back", "textures/ui/arrow_dark_left_stretch.png", FormManager::BACK_LABEL);
 

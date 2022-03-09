@@ -65,9 +65,9 @@ abstract class GetPoggitReleases extends AsyncTask{
 		}
 
 		if($downloadApi){
-			$rawJson = Internet::getUrl(self::POGGIT_RELEASES_URL, $this->timeout);
-			if($rawJson !== false){
-				$jsonAssoc = json_decode($rawJson, true);
+			$request = Internet::getUrl(self::POGGIT_RELEASES_URL, $this->timeout);
+			if($request !== null){
+				$jsonAssoc = json_decode($request->getBody(), true);
 				if(is_array($jsonAssoc)){
 					$poggitJson = [];
 					foreach($jsonAssoc as $data){
@@ -94,9 +94,9 @@ abstract class GetPoggitReleases extends AsyncTask{
 				}
 			}
 		}else{
-			$rawJson = file_get_contents($this->poggitCacheFile);
-			if($rawJson !== false){
-				$poggitJson = json_decode($rawJson, true);
+			$request = file_get_contents($this->poggitCacheFile);
+			if($request !== false){
+				$poggitJson = json_decode($request, true);
 				if(is_array($poggitJson)){
 					$this->worker->saveToThreadStore(self::POGGIT_JSON_ID, $poggitJson);
 				}

@@ -46,17 +46,19 @@ final class DownloadPluginTask extends AsyncTask{
 	}
 
 	public function onRun() : void{
-		$pharData = Internet::getURL("$this->artifactUrl/$this->pluginName.phar", $this->timeout);
+		$request = Internet::getURL("$this->artifactUrl/$this->pluginName.phar", $this->timeout);
 
-		if($pharData !== false){
-			$this->setResult(file_put_contents($this->pluginPath . $this->pluginName . ".phar", $pharData) !== false);
+		if($request !== null){
+			$this->setResult(file_put_contents($this->pluginPath . $this->pluginName . ".phar", $request->getBody()) !== false);
 		}else{
 			$this->setResult(false);
 		}
+
+
 	}
 
-	public function onCompletion(Server $server) : void{
-		$player = Server::getInstance()->getPlayer($this->playerName);
+	public function onCompletion() : void{
+		$player = Server::getInstance()->getPlayerExact($this->playerName);
 		if($player === null){
 			return;
 		}

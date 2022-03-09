@@ -28,13 +28,11 @@ use matcracker\FormLib\Form;
 use matcracker\ServerTools\forms\FormManager;
 use matcracker\ServerTools\Main;
 use matcracker\ServerTools\utils\Utils;
-use pocketmine\item\ItemFactory;
-use pocketmine\item\ItemIds;
-use pocketmine\item\WritableBook;
+use pocketmine\item\VanillaItems;
+use pocketmine\item\WritableBookBase;
 use pocketmine\item\WrittenBook;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\StringTag;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\plugin\PluginException;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
@@ -101,15 +99,13 @@ final class FileEditorForm extends Form{
 					$player->sendForm(new RenameFileForm($filePath, $player));
 
 				}else{
-					/**@var WrittenBook $book */
-					$book = ItemFactory::get(ItemIds::WRITTEN_BOOK);
-
 					if($data === self::EDIT_FILE){
-						/**@var WritableBook $book */
-						$book = ItemFactory::get(ItemIds::WRITABLE_BOOK);
+						$book = VanillaItems::WRITABLE_BOOK();
+					}else{
+						$book = VanillaItems::WRITTEN_BOOK();
 					}
 
-					$book = self::setupFileBook($book, $filePath);
+					self::setupFileBook($book, $filePath);
 
 					if($fileResource = fopen($filePath, "r")){
 						$pageCount = 0;
@@ -170,7 +166,7 @@ final class FileEditorForm extends Form{
 			$this->addLocalImageButton("Read", "textures/items/book_normal.png", self::READ_FILE);
 		}
 
-		if(is_writable($filePath) && $player->hasPermission("st.ui.file-explorer.write")){
+		if(is_writable($filePath) && ($player->hasPermission("st.ui.file-explorer.write") || Utils::canBypassPermission($player))){
 			if($canBeOpen){
 				$this->addLocalImageButton("Edit", "textures/ui/text_color_paintbrush.png", self::EDIT_FILE);
 			}
@@ -180,7 +176,7 @@ final class FileEditorForm extends Form{
 		}
 	}
 
-	public static function setupFileBook(WritableBook $book, string $filePath) : WritableBook{
+	public static function setupFileBook(WritableBookBase $book, string $filePath) : void{
 		if(is_dir($filePath)){
 			throw new InvalidArgumentException("The file path must be a file not a directory.");
 		}
@@ -192,11 +188,9 @@ final class FileEditorForm extends Form{
 			$book->setAuthor(Server::getInstance()->getName());
 		}
 
-		$book->setCustomName($fileName);
-		$book->setNamedTagEntry(new CompoundTag("ServerTools", [
-			new StringTag("FilePath", $filePath)
-		]));
+		$tag = CompoundTag::create()->setString("ServerTools_FilePath", $filePath);
 
-		return $book;
+		$book->setCustomName($fileName);
+		$book->setNamedTag($tag);
 	}
 }

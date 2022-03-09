@@ -6,7 +6,7 @@ namespace matcracker\ServerTools\forms\files;
 
 use matcracker\ServerTools\forms\FormManager;
 use matcracker\ServerTools\Main;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\plugin\PluginException;
 use pocketmine\utils\TextFormat;
 use function basename;

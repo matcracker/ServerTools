@@ -49,11 +49,11 @@ final class FTPConnectionTask extends AsyncTask{
 
 	private const PROGRESSBAR_SIZE = 25;
 
-	private $ftpConnection;
-	private $serverPath;
-	private $filter;
-	private $playerName;
-	private $protocol;
+	private string $ftpConnection;
+	private string $serverPath;
+	private string $filter;
+	private string $playerName;
+	private string $protocol;
 
 	/**
 	 * AsyncFTPConnection constructor.
@@ -116,17 +116,15 @@ final class FTPConnectionTask extends AsyncTask{
 			if($ftp->disconnect($ftpStream)){
 				$this->setResult($failedFiles);
 			}else{
-				$this->setResult(FTPConnection::ERR_DISCONNECT);
+				$this->setResult(FTPBase::ERR_DISCONNECT);
 			}
 		}else{
 			$this->setResult($ftpStream);
 		}
 	}
 
-	public function onProgressUpdate(Server $server, $progress) : void{
-		$server = Server::getInstance();
-
-		if(($player = $server->getPlayer($this->playerName)) === null){
+	public function onProgressUpdate($progress) : void{
+		if(($player = Server::getInstance()->getPlayerExact($this->playerName)) === null){
 			return;
 		}
 
@@ -135,15 +133,13 @@ final class FTPConnectionTask extends AsyncTask{
 		$bar = TextFormat::YELLOW . "Cloning Progress" . TextFormat::EOL . //Title
 			TextFormat::WHITE . "[" . TextFormat::GREEN . str_repeat("|", $progress) . //Current progress
 			TextFormat::RED . str_repeat("|", self::PROGRESSBAR_SIZE - $progress) . TextFormat::WHITE . "] " .//Remaining progress
-			TextFormat::AQUA . "{$percentage} %%"; //Percentage
+			TextFormat::AQUA . "$percentage %%"; //Percentage
 
 		$player->sendTip($bar);
 	}
 
-	public function onCompletion(Server $server) : void{
-		$server = Server::getInstance();
-
-		if(($player = $server->getPlayerExact($this->playerName)) === null){
+	public function onCompletion() : void{
+		if(($player = Server::getInstance()->getPlayerExact($this->playerName)) === null){
 			return;
 		}
 
@@ -152,13 +148,13 @@ final class FTPConnectionTask extends AsyncTask{
 
 		if(is_int($result)){
 			switch($result){
-				case FTPConnection::ERR_CONNECT:
+				case FTPBase::ERR_CONNECT:
 					$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not connect to the " . $this->protocol . " server."));
 					break;
-				case FTPConnection::ERR_LOGIN:
+				case FTPBase::ERR_LOGIN:
 					$player->sendMessage(Main::formatMessage(TextFormat::RED . "Wrong username or password for the " . $this->protocol . " server."));
 					break;
-				case FTPConnection::ERR_DISCONNECT:
+				case FTPBase::ERR_DISCONNECT:
 					$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not disconnect from the " . $this->protocol . " server."));
 					break;
 			}

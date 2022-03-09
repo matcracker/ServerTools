@@ -39,12 +39,8 @@ final class Main extends PluginBase{
 	private const CONFIG_VERSION = 2;
 	private static ?Main $instance;
 
-	public static function getInstance() : Main{
-		if(self::$instance === null){
-			throw new PluginException("ServerTools instance could not be accessed because it is disabled or not loaded yet.");
-		}
-
-		return self::$instance;
+	public static function formatMessage(string $message) : string{
+		return TextFormat::AQUA . "[ServerTools] " . TextFormat::RESET . $message;
 	}
 
 	public function restartServer() : bool{
@@ -71,10 +67,6 @@ final class Main extends PluginBase{
 		return true;
 	}
 
-	public static function formatMessage(string $message) : string{
-		return TextFormat::AQUA . "[ServerTools] " . TextFormat::RESET . $message;
-	}
-
 	public function onLoad() : void{
 		self::$instance = $this;
 
@@ -88,8 +80,16 @@ final class Main extends PluginBase{
 		$this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
 	}
 
-	public function onDisable(){
+	public function onDisable(): void{
 		self::$instance = null;
+	}
+
+	public static function getInstance() : Main{
+		if(self::$instance === null){
+			throw new PluginException("ServerTools instance could not be accessed because it is disabled or not loaded yet.");
+		}
+
+		return self::$instance;
 	}
 
 }

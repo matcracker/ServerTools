@@ -1,7 +1,7 @@
 <?php
 
 /*
- *    _________                              ___________           .__
+ *	  _________                              ___________           .__
  *	 /   _____/ ______________  __ __________\__    ___/___   ____ |  |   ______
  *	 \_____  \_/ __ \_  __ \  \/ // __ \_  __ \|    | /  _ \ /  _ \|  |  /  ___/
  *	 /        \  ___/|  | \/\   /\  ___/|  | \/|    |(  <_> |  <_> )  |__\___ \
@@ -21,27 +21,31 @@
 
 declare(strict_types=1);
 
-namespace matcracker\ServerTools\forms\plugins\manager;
+namespace matcracker\ServerTools\forms;
 
+use matcracker\FormLib\CustomForm;
 use matcracker\FormLib\Form;
-use matcracker\ServerTools\forms\FormManager;
-use pocketmine\player\Player;
+use pocketmine\Player;
 
-final class PluginManagerForm extends Form{
+final class SettingsFormManager extends Form{
 
 	public function __construct(){
 		parent::__construct(
-			function(Player $player, $data) : void{
-				switch((int) $data){
-					case 0:
-						$player->sendForm(new PluginEnablerForm());
-						break;
-				}
+			static function(Player $player, $data) : void{
 
 			},
 			FormManager::onClose(FormManager::getMainMenu())
 		);
-		$this->setTitle("Plugin Manager")
-			->addClassicButton("Enable/Disable plugin");
+		$this->setTitle("ServerTools Settings")
+			->addClassicButton("File Explorer");
+	}
+
+	private function getFileExplorerSettings() : CustomForm{
+		return (new CustomForm(
+			static function(Player $player, $data) : void{
+
+			},
+			FormManager::onClose(FormManager::getMainMenu())
+		))->addToggle("Show file extension");
 	}
 }

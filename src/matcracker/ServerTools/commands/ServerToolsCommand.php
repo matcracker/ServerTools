@@ -27,12 +27,11 @@ use matcracker\ServerTools\forms\FormManager;
 use matcracker\ServerTools\Main;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\command\PluginIdentifiableCommand;
-use pocketmine\Player;
-use pocketmine\plugin\Plugin;
+use pocketmine\player\Player;
+use pocketmine\plugin\PluginOwned;
 use pocketmine\utils\TextFormat;
 
-final class ServerToolsCommand extends Command implements PluginIdentifiableCommand{
+final class ServerToolsCommand extends Command implements PluginOwned{
 	private Main $plugin;
 
 	public function __construct(Main $plugin){
@@ -63,10 +62,7 @@ final class ServerToolsCommand extends Command implements PluginIdentifiableComm
 		return true;
 	}
 
-	/**
-	 * @return Main
-	 */
-	public function getPlugin() : Plugin{
+	public function getOwningPlugin() : Main{
 		return $this->plugin;
 	}
 }

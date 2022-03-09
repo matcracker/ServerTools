@@ -32,7 +32,8 @@ use matcracker\ServerTools\ftp\FTPConnection;
 use matcracker\ServerTools\ftp\SFTPConnection;
 use matcracker\ServerTools\Main;
 use matcracker\ServerTools\utils\Utils;
-use pocketmine\Player;
+use pocketmine\player\Player;
+use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 final class MainMenuForm extends Form{
@@ -40,8 +41,7 @@ final class MainMenuForm extends Form{
 	public function __construct(){
 		parent::__construct(
 			function(Player $player, $data) : void{
-				$opBypassPermissions = $player->isOp() && (bool) Main::getInstance()->getConfig()->get("op-bypass-permissions", false);
-				if(!$player->hasPermission("st.ui.$data") && !$opBypassPermissions){
+				if(!$player->hasPermission("st.ui.$data") && !Utils::canBypassPermission($player)){
 					$player->sendMessage(Main::formatMessage(TextFormat::RED . "You do not have permission to use this function"));
 
 					return;

@@ -27,7 +27,7 @@ use matcracker\FormLib\CustomForm;
 use matcracker\ServerTools\ftp\FTPBase;
 use matcracker\ServerTools\task\async\FTPConnectionTask;
 use matcracker\ServerTools\utils\Utils;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\Server;
 use function is_string;
 
