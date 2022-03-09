@@ -33,7 +33,6 @@ use function basename;
 use function count;
 use function file_put_contents;
 use function is_writable;
-use function var_dump;
 
 final class EventListener implements Listener{
 
@@ -44,49 +43,51 @@ final class EventListener implements Listener{
 	}
 
 	public function onPlayerEditBook(PlayerEditBookEvent $event) : void{
-		$player = $event->getPlayer();
-		$newBook = $event->getNewBook();
+		if($event->getAction() !== PlayerEditBookEvent::ACTION_SIGN_BOOK){
+			return;
+		}
 
-
-		$filePath = $newBook->getNamedTag()->getString("ServerTools_FilePath", "null");
+		$oldBook = $event->getOldBook();
+		$filePath = $oldBook->getNamedTag()->getString("ServerTools_FilePath", "null");
 
 		if($filePath === "null"){
 			return;
 		}
 
-		if($event->getAction() === PlayerEditBookEvent::ACTION_SIGN_BOOK){
-			$fileName = basename($filePath);
-			if(!is_writable($filePath)){
-				$player->sendMessage(Main::formatMessage(TextFormat::RED . "The file \"$fileName\" does not exist or is not writable."));
+		$player = $event->getPlayer();
 
-				return;
-			}
+		$fileName = basename($filePath);
+		if(!is_writable($filePath)){
+			$player->sendMessage(Main::formatMessage(TextFormat::RED . "The file \"$fileName\" does not exist or is not writable."));
 
-			$newFileContent = "";
-			for($pageId = 0; $pageId < count($newBook->getPages()); $pageId++){
-				$newFileContent .= $newBook->getPageText($pageId) ?? "";
-			}
+			return;
+		}
 
-			if(file_put_contents($filePath, $newFileContent) === false){
-				$player->sendMessage(Main::formatMessage(TextFormat::RED . "Error while saving the new content of file \"$fileName\"."));
-			}else{
-				$bookSlot = $player->getInventory()->getHeldItemIndex();
-				//Remove the book from the hotbar
-				$this->plugin->getScheduler()->scheduleDelayedTask(
-					new ClosureTask(
-						static function() use ($player, $bookSlot) : void{
-							if($player !== null){
-								$book = $player->getInventory()->getHotbarSlotItem($bookSlot);
-								if($book instanceof WrittenBook){
-									$player->getInventory()->setItem($bookSlot, ItemFactory::air());
-								}
+		$newFileContent = "";
+		for($pageId = 0; $pageId < count($oldBook->getPages()); $pageId++){
+			$newFileContent .= $oldBook->getPageText($pageId) ?? "";
+		}
+
+		if(file_put_contents($filePath, $newFileContent) === false){
+			$player->sendMessage(Main::formatMessage(TextFormat::RED . "Error while saving the new content of file \"$fileName\"."));
+		}else{
+			$bookSlot = $player->getInventory()->getHeldItemIndex();
+			//Remove the book from the hotbar
+			$this->plugin->getScheduler()->scheduleDelayedTask(
+				new ClosureTask(
+					static function() use ($player, $bookSlot) : void{
+						if($player !== null){
+							$book = $player->getInventory()->getHotbarSlotItem($bookSlot);
+							if($book instanceof WrittenBook){
+								$player->getInventory()->setItem($bookSlot, ItemFactory::air());
 							}
 						}
-					), 1
-				);
+					}
+				), 1
+			);
 
-				$player->sendMessage(Main::formatMessage(TextFormat::GREEN . "File successfully edited!"));
-			}
+			$player->sendMessage(Main::formatMessage(TextFormat::GREEN . "File successfully edited!"));
 		}
+
 	}
 }
