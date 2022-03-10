@@ -79,7 +79,7 @@ abstract class FTPBase{
 	public final function __toString() : string{
 		return "$this->username@$this->host:$this->port";
 	}
-	
+
 	/**
 	 * Prepares value to be var_dump()'ed without leaking password
 	 */

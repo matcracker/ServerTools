@@ -31,7 +31,6 @@ use function count;
 use function mb_strtolower;
 use function mb_substr;
 use function strlen;
-use function strpos;
 use const ARRAY_FILTER_USE_BOTH;
 
 final class SearchPluginTask extends GetPoggitReleases{

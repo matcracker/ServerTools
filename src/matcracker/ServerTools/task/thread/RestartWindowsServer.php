@@ -41,7 +41,7 @@ final class RestartWindowsServer extends Thread{
 		}
 	}
 
-	public function quit(): void{
+	public function quit() : void{
 		parent::quit();
 		$res = proc_open("start cmd.exe /c \"timeout /t 5 & $this->fileName\"", [], $pipes);
 		if(is_resource($res)){

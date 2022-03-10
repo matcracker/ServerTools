@@ -25,7 +25,6 @@ namespace matcracker\ServerTools\forms;
 
 use matcracker\FormLib\CustomForm;
 use matcracker\FormLib\Form;
-use pocketmine\Player;
 
 final class SettingsFormManager extends Form{
 

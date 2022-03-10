@@ -33,7 +33,6 @@ use matcracker\ServerTools\ftp\SFTPConnection;
 use matcracker\ServerTools\Main;
 use matcracker\ServerTools\utils\Utils;
 use pocketmine\player\Player;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
 final class MainMenuForm extends Form{
