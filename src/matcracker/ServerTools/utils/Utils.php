@@ -125,15 +125,12 @@ final class Utils{
 
 	public static function isValidFileName(string $fileName) : bool{
 		$os = PMUtils::getOS();
-		switch($os){
-			case PMUtils::OS_WINDOWS:
-				return self::isValidWindowsFileName($fileName);
-			case PMUtils::OS_MACOS:
-			case PMUtils::OS_IOS:
-				return self::isValidMacFileName($fileName);
-			default:
-				return self::isValidUnixFileName($fileName);
-		}
+
+		return match ($os) {
+			PMUtils::OS_WINDOWS => self::isValidWindowsFileName($fileName),
+			PMUtils::OS_MACOS, PMUtils::OS_IOS => self::isValidMacFileName($fileName),
+			default => self::isValidUnixFileName($fileName),
+		};
 	}
 
 	public static function isValidWindowsFileName(string $fileName) : bool{
