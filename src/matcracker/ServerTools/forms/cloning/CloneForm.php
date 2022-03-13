@@ -66,6 +66,6 @@ final class CloneForm extends Form{
 	}
 
 	private function getFTPForm() : CustomForm{
-		return (new BaseFTPForm("FTP Settings"))->addToggle("Use SSL", true);
+		return (new BaseFTPForm("FTP Settings"))->addToggle("Use SSL", true, "ssl");
 	}
 }

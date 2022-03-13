@@ -56,8 +56,8 @@ final class BaseFTPForm extends CustomForm{
 				$password = (string) $data["password"];
 				$remoteHomePath = (string) $data["remote_path"];
 
-				if(isset($data[6])){
-					$ssl = (bool) $data[6];
+				if(isset($data["ssl"])){
+					$ssl = (bool) $data["ssl"];
 					$ftpConnection = new FTPConnection($host, $port, $username, $password, $remoteHomePath, $ssl);
 				}else{
 					$ftpConnection = new SFTPConnection($host, $port, $username, $password, $remoteHomePath);
