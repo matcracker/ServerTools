@@ -70,10 +70,10 @@ final class BaseFTPForm extends CustomForm{
 
 		$this->setTitle($title)
 			->addLabel("The following form will not immediately validated.")
-			->addInput("Host address", "host")
-			->addInput("Port", "21", "port")
-			->addInput("Username", "admin", "username")
-			->addInput("Password", "**********", "password")
-			->addInput("Remote home path", "/", "remote_path");
+			->addInput("Host address", label: "host")
+			->addInput("Port", "21", label: "port")
+			->addInput("Username", "admin", label: "username")
+			->addInput("Password", "**********", label: "password")
+			->addInput("Remote home path", "/", label: "remote_path");
 	}
 }
