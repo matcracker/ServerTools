@@ -49,6 +49,7 @@ use function is_writable;
 use function str_repeat;
 use function str_replace;
 use function strlen;
+use function utf8_encode;
 
 final class FileEditorForm extends Form{
 	/**
@@ -116,7 +117,7 @@ final class FileEditorForm extends Form{
 							$line = str_replace("\t", str_repeat(" ", 4), $line);
 
 							if(strlen($pageContent) > self::BOOK_ROW_MAX * self::BOOK_COL_MAX){
-								$book->setPageText($pageCount, $pageContent);
+								$book->setPageText($pageCount, utf8_encode($pageContent));
 
 								$pageContent = $line;
 								$pageCount++;
@@ -136,7 +137,7 @@ final class FileEditorForm extends Form{
 						}
 
 						if($pageCount < 50){
-							$book->setPageText($pageCount, $pageContent);
+							$book->setPageText($pageCount, utf8_encode($pageContent));
 						}
 
 						$player->getInventory()->setItemInHand($book);
