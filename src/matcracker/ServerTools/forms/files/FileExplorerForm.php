@@ -51,7 +51,7 @@ final class FileExplorerForm extends Form{
 		parent::__construct(
 			static function(Player $player, $data) use ($filePath){
 				if($data === FormManager::BACK_LABEL){
-					$form = new self(dirname($filePath, 1), $player);
+					$form = new self(dirname($filePath), $player);
 				}elseif($data === self::NEW_FOLDER){
 					$form = new NewFolderForm($filePath, $player);
 				}elseif($data === self::NEW_FILE){

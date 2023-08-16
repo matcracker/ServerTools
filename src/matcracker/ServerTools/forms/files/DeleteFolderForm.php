@@ -29,7 +29,7 @@ final class DeleteFolderForm extends ModalForm{
 
 						return;
 					}
-					$form = new FileExplorerForm(dirname($folderPath, 1), $player);
+					$form = new FileExplorerForm(dirname($folderPath), $player);
 				}else{
 					$form = new FileExplorerForm($folderPath, $player);
 				}
