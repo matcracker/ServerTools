@@ -43,7 +43,7 @@ final class SearchPluginTask extends GetPoggitReleases{
 	public function onRun() : void{
 		parent::onRun();
 		/** @var array $poggitJson */
-		$poggitJson = $this->worker->getFromThreadStore(self::POGGIT_JSON_ID);
+		$poggitJson = $this->fetchLocal(self::POGGIT_JSON_ID);
 
 		if(strlen($this->nameToSearch) > 0){
 			$result = array_filter(

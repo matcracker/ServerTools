@@ -90,7 +90,7 @@ abstract class GetPoggitReleases extends AsyncTask{
 						];
 					}
 					file_put_contents($this->poggitCacheFile, json_encode($poggitJson));
-					$this->worker->saveToThreadStore(self::POGGIT_JSON_ID, $poggitJson);
+					$this->storeLocal(self::POGGIT_JSON_ID, $poggitJson);
 				}
 			}
 		}else{
@@ -98,7 +98,7 @@ abstract class GetPoggitReleases extends AsyncTask{
 			if($request !== false){
 				$poggitJson = json_decode($request, true);
 				if(is_array($poggitJson)){
-					$this->worker->saveToThreadStore(self::POGGIT_JSON_ID, $poggitJson);
+					$this->storeLocal(self::POGGIT_JSON_ID, $poggitJson);
 				}
 			}
 		}

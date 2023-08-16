@@ -1,0 +1,30 @@
+{
+	"name": "matcracker/servertools",
+	"description": "ServerTools is PocketMine-MP plugin containing a set of tools that allows you to manage your server directly from the game!",
+	"minimum-stability": "stable",
+	"license": "LGPL-3.0",
+	"authors": [
+		{
+			"name": "matcracker"
+		}
+	],
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "https://github.com/matcracker/FormLib"
+		}
+	],
+	"require": {
+		"pocketmine/pocketmine-mp": "^5.0.0",
+		"dktapps/pmforms": "dev-master",
+		"matcracker/formlib": "dev-master"
+	},
+	"require-dev": {
+		"sof3/pharynx": "^0.3.0"
+	},
+	"autoload": {
+		"classmap": [
+			"src"
+		]
+	}
+}
