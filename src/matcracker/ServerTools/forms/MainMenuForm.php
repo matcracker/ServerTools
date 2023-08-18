@@ -23,57 +23,67 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\forms;
 
-use matcracker\FormLib\Form;
+use dktapps\pmforms\MenuForm;
 use matcracker\ServerTools\forms\cloning\CloneForm;
+use matcracker\ServerTools\forms\elements\PermissibleMenuOption;
 use matcracker\ServerTools\forms\files\FileExplorerForm;
 use matcracker\ServerTools\forms\plugins\downloader\SearchPluginForm;
 use matcracker\ServerTools\forms\plugins\manager\PluginManagerForm;
 use matcracker\ServerTools\ftp\FTPConnection;
 use matcracker\ServerTools\ftp\SFTPConnection;
 use matcracker\ServerTools\Main;
-use matcracker\ServerTools\utils\Utils;
+use matcracker\ServerTools\utils\FormUtils;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
 
-final class MainMenuForm extends Form{
+final class MainMenuForm extends MenuForm{
 
-	public function __construct(){
+	public function __construct(Main $plugin){
+		static $options = [
+			new PermissibleMenuOption("st.ui.file-explorer", "File Explorer"),
+			new PermissibleMenuOption("st.ui.clone", "Clone Server"),
+			new PermissibleMenuOption("st.ui.plugin-manager", "Plugin Manager"),
+			new PermissibleMenuOption("st.ui.poggit-downloader", "Poggit Plugin Downloader"),
+			new PermissibleMenuOption("st.ui.restart", "Restart Server")
+		];
+
 		parent::__construct(
-			function(Player $player, $data) : void{
-				if(!$player->hasPermission("st.ui.$data") && !Utils::canBypassPermission($player)){
+			$plugin->getName(),
+			"Select an option",
+			$options,
+			static function(Player $player, int $selectedOption) use ($plugin, $options) : void{
+				if(!$player->hasPermission($options[$selectedOption]->getPermission()) && !$plugin->canBypassPermission($player)){
 					$player->sendMessage(Main::formatMessage(TextFormat::RED . "You do not have permission to use this function"));
 
 					return;
 				}
 
-				switch($data){
-					case "file-explorer":
-						$player->sendForm(new FileExplorerForm(Utils::getServerPath(), $player));
+				switch($selectedOption){
+					case 0:
+						$player->sendForm(new FileExplorerForm($plugin, $plugin->getServerDataPath(), $player));
 						break;
-					case "clone":
+					case 1:
 						if(FTPConnection::hasExtension() || SFTPConnection::hasExtension()){
-							$player->sendForm((new CloneForm()));
+							$player->sendForm(new CloneForm($plugin));
 						}else{
-							$player->sendForm(
-								FormManager::getConfirmForm(
-									"Missing extensions!",
-									TextFormat::RED . "The server is missing the following PHP extensions:\n" .
-									"- ftp > for FTP feature\n" .
-									"- openssl > for SFTP feature\n" .
-									"- libssh2 > for SFTP feature\n",
-									FormManager::onClose($this)
-								)
-							);
+							$player->sendForm(FormUtils::getConfirmForm(
+								"Missing extensions!",
+								TextFormat::RED . "The server is missing the following PHP extensions:\n" .
+								"- ftp > for FTP feature\n" .
+								"- openssl > for SFTP feature\n" .
+								"- libssh2 > for SFTP feature\n",
+								FormUtils::onClose(new self($plugin))
+							));
 						}
 						break;
-					case "plugin-manager":
-						$player->sendForm(new PluginManagerForm());
+					case 2:
+						$player->sendForm(new PluginManagerForm($plugin));
 						break;
-					case "poggit-downloader":
-						$player->sendForm(new SearchPluginForm());
+					case 3:
+						$player->sendForm(new SearchPluginForm($plugin));
 						break;
-					case "restart":
-						if(!Main::getInstance()->restartServer()){
+					case 4:
+						if(!$plugin->restartServer()){
 							$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not restart the server."));
 						}
 
@@ -81,11 +91,5 @@ final class MainMenuForm extends Form{
 				}
 			}
 		);
-		$this->setTitle("Server Tools")
-			->addClassicButton("File Explorer", "file-explorer")
-			->addClassicButton("Clone Server", "clone")
-			->addClassicButton("Plugin Manager", "plugin-manager")
-			->addClassicButton("Poggit Plugin Downloader", "poggit-downloader")
-			->addClassicButton("Restart Server", "restart");
 	}
 }

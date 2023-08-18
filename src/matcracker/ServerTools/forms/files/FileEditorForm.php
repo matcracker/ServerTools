@@ -23,15 +23,14 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\forms\files;
 
+use dktapps\pmforms\FormIcon;
+use dktapps\pmforms\MenuForm;
 use InvalidArgumentException;
-use matcracker\FormLib\Form;
-use matcracker\ServerTools\forms\FormManager;
+use matcracker\ServerTools\forms\elements\TaggedMenuOption;
 use matcracker\ServerTools\Main;
+use matcracker\ServerTools\utils\FormUtils;
 use matcracker\ServerTools\utils\Utils;
 use pocketmine\item\VanillaItems;
-use pocketmine\item\WritableBookBase;
-use pocketmine\item\WrittenBook;
-use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginException;
 use pocketmine\Server;
@@ -43,15 +42,15 @@ use function fgets;
 use function filesize;
 use function fopen;
 use function is_dir;
-use function is_file;
 use function is_readable;
+use function is_resource;
 use function is_writable;
+use function mb_convert_encoding;
 use function str_repeat;
 use function str_replace;
 use function strlen;
-use function utf8_encode;
 
-final class FileEditorForm extends Form{
+final class FileEditorForm extends MenuForm{
 	/**
 	 * Max number of rows in a book.
 	 */
@@ -74,124 +73,126 @@ final class FileEditorForm extends Form{
 	 */
 	private const BOOK_MAX_SIZE = self::BOOK_ROW_MAX * self::BOOK_COL_MAX * self::BOOK_PAGES_MAX;
 
-	private const READ_FILE = "/read_file";
-	private const EDIT_FILE = "/edit_file";
-	private const RENAME_FILE = "/rename_file";
-	private const DELETE_FILE = "/delete_file";
+	public const FILE_TAG = Main::PLUGIN_NAME . "_FilePath";
+	private const FORM_KEY_READ_FILE = "read_file";
+	private const FORM_KEY_EDIT_FILE = "edit_file";
+	private const FORM_KEY_RENAME_FILE = "rename_file";
+	private const FORM_KEY_DELETE_FILE = "delete_file";
 
-	public function __construct(string $filePath, Player $player){
-		if(!is_file($filePath)){
-			throw new PluginException("The $filePath must be a file.");
+	private string $fileName;
+
+	public function __construct(Main $plugin, private readonly string $filePath, private readonly Player $player){
+		if(is_dir($filePath)){
+			throw new InvalidArgumentException("The path \"$filePath\" must be a file.");
 		}
 
-		$fileName = basename($filePath);
+		$this->fileName = basename($filePath);
+
+		/** @var TaggedMenuOption[] $options */
+		$options = [];
+
+		if(!is_readable($filePath)){
+			$message = TextFormat::RED . "The file \"$this->fileName\" does not exist or is not readable.";
+		}else{
+			$message = "Name: $this->fileName" . TextFormat::EOL .
+				"Size: " . Utils::bytesToHuman(filesize($filePath));
+
+			if($canBeOpen = (filesize($filePath) <= self::BOOK_MAX_SIZE)){
+				$options[] = new TaggedMenuOption(self::FORM_KEY_READ_FILE, "Read", new FormIcon("textures/items/book_normal.png", FormIcon::IMAGE_TYPE_PATH));
+			}
+
+			if(is_writable($filePath) && ($player->hasPermission("st.ui.file-explorer.write") || $plugin->canBypassPermission($player))){
+				if($canBeOpen){
+					$options[] = new TaggedMenuOption(self::FORM_KEY_EDIT_FILE, "Edit", new FormIcon("textures/ui/text_color_paintbrush.png", FormIcon::IMAGE_TYPE_PATH));
+				}
+
+				$options[] = new TaggedMenuOption(self::FORM_KEY_RENAME_FILE, "Rename", new FormIcon("textures/ui/pencil_edit_icon.png", FormIcon::IMAGE_TYPE_PATH));
+				$options[] = new TaggedMenuOption(self::FORM_KEY_DELETE_FILE, "Delete", new FormIcon("textures/ui/trash.png", FormIcon::IMAGE_TYPE_PATH));
+			}
+		}
+
 		parent::__construct(
-			static function(Player $player, $data) use ($filePath, $fileName){
+			"File Editor",
+			$message,
+			$options,
+			function(Player $player, int $selectedOption) use ($plugin, $options, $filePath) : void{
 				if(!is_readable($filePath)){
-					$player->sendMessage(Main::formatMessage(TextFormat::RED . "The file \"$fileName\" does not exist or is not readable."));
+					$player->sendMessage(Main::formatMessage(TextFormat::RED . "The file \"$this->fileName\" does not exist or is not readable."));
 
 					return;
 				}
 
-				if($data === self::DELETE_FILE){
-					$player->sendForm(new DeleteFileForm($filePath, $player));
+				$tag = $options[$selectedOption]->getTag();
 
-				}elseif($data === self::RENAME_FILE){
-					$player->sendForm(new RenameFileForm($filePath, $player));
-
-				}else{
-					if($data === self::EDIT_FILE){
-						$book = VanillaItems::WRITABLE_BOOK();
-					}else{
-						$book = VanillaItems::WRITTEN_BOOK();
-					}
-
-					self::setupFileBook($book, $filePath);
-
-					if($fileResource = fopen($filePath, "r")){
-						$pageCount = 0;
-						$pageContent = "";
-
-						while(($buff = fgets($fileResource)) !== false){
-							$line = str_replace("\r", "", $buff);
-							$line = str_replace("\t", str_repeat(" ", 4), $line);
-
-							if(strlen($pageContent) > self::BOOK_ROW_MAX * self::BOOK_COL_MAX){
-								$book->setPageText($pageCount, utf8_encode($pageContent));
-
-								$pageContent = $line;
-								$pageCount++;
-
-								if($pageCount >= 50){
-									break;
-								}
-							}else{
-								$pageContent .= $line;
-							}
-						}
-
-						if(!fclose($fileResource)){
-							$player->sendMessage(Main::formatMessage(TextFormat::RED . "Cannot close the file stream of $fileName"));
-
-							return;
-						}
-
-						if($pageCount < 50){
-							$book->setPageText($pageCount, utf8_encode($pageContent));
-						}
-
-						$player->getInventory()->setItemInHand($book);
-					}else{
-						$player->sendMessage(Main::formatMessage(TextFormat::RED . "Cannot open the file stream of $fileName"));
-					}
+				switch($tag){
+					case self::FORM_KEY_DELETE_FILE:
+						$player->sendForm(new DeleteFileForm($plugin, $filePath));
+						break;
+					case self::FORM_KEY_RENAME_FILE:
+						$player->sendForm(new RenameFileForm($plugin, $filePath, $player));
+						break;
+					case self::FORM_KEY_EDIT_FILE:
+						$this->fileToBook(true);
+						break;
+					case self::FORM_KEY_READ_FILE:
+						$this->fileToBook(false);
+						break;
+					default:
+						throw new PluginException(); //TODO
 				}
 			},
-			FormManager::onClose(new FileExplorerForm(dirname($filePath), $player))
+			FormUtils::onClose(new FileExplorerForm($plugin, dirname($filePath), $player))
 		);
+	}
 
-		$this->setTitle("File Editor");
+	private function fileToBook(bool $writableBook) : void{
+		$stream = fopen($this->filePath, "r");
 
-		if(!is_readable($filePath)){
-			$this->setMessage(TextFormat::RED . "The file \"$fileName\" does not exist or is not readable.");
+		if(!is_resource($stream)){
+			$this->player->sendMessage(Main::formatMessage(TextFormat::RED . "Cannot open the file stream of \"$this->filePath\""));
 
 			return;
 		}
 
-		$fileInfoMessage =
-			"Name: $fileName" . TextFormat::EOL .
-			"Size: " . Utils::bytesToHuman(filesize($filePath));
-
-		$this->setMessage($fileInfoMessage);
-
-		if($canBeOpen = (filesize($filePath) <= self::BOOK_MAX_SIZE)){
-			$this->addLocalImageButton("Read", "textures/items/book_normal.png", self::READ_FILE);
+		if($writableBook){
+			$book = VanillaItems::WRITABLE_BOOK();
+		}else{
+			$book = VanillaItems::WRITTEN_BOOK()
+				->setTitle($this->fileName)
+				->setAuthor(Server::getInstance()->getName());
 		}
 
-		if(is_writable($filePath) && ($player->hasPermission("st.ui.file-explorer.write") || Utils::canBypassPermission($player))){
-			if($canBeOpen){
-				$this->addLocalImageButton("Edit", "textures/ui/text_color_paintbrush.png", self::EDIT_FILE);
+		$tag = $book->getNamedTag()->setString(self::FILE_TAG, $this->filePath);
+
+		$pageId = 0;
+		$pageContent = "";
+		$book->setNamedTag($tag)->setCustomName($this->fileName)->addPage($pageId);
+
+		$tab = str_repeat(" ", 4);
+
+		while(($line = fgets($stream)) !== false){
+			$text = mb_convert_encoding(str_replace(["\r", "\t"], ["", $tab], $line), "UTF-8");
+
+			if(strlen($pageContent) > self::BOOK_ROW_MAX * self::BOOK_COL_MAX){
+				if($pageId + 1 >= 50){
+					break;
+				}
+
+				$pageContent = $text;
+				$pageId++;
+			}else{
+				$pageContent .= $text;
 			}
 
-			$this->addLocalImageButton("Rename", "textures/ui/pencil_edit_icon.png", self::RENAME_FILE)
-				->addLocalImageButton("Delete", "textures/ui/trash.png", self::DELETE_FILE);
-		}
-	}
-
-	public static function setupFileBook(WritableBookBase $book, string $filePath) : void{
-		if(is_dir($filePath)){
-			throw new InvalidArgumentException("The file path must be a file not a directory.");
+			$book->setPageText($pageId, $pageContent);
 		}
 
-		$fileName = basename($filePath);
+		if(!fclose($stream)){
+			$this->player->sendMessage(Main::formatMessage(TextFormat::RED . "Cannot close the file stream of \"$this->filePath\""));
 
-		if($book instanceof WrittenBook){
-			$book->setTitle($fileName);
-			$book->setAuthor(Server::getInstance()->getName());
+			return;
 		}
 
-		$tag = CompoundTag::create()->setString("ServerTools_FilePath", $filePath);
-
-		$book->setCustomName($fileName);
-		$book->setNamedTag($tag);
+		$this->player->getInventory()->setItemInHand($book);
 	}
 }

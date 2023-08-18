@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\ftp;
 
+use FTP\Connection;
 use function extension_loaded;
 use function ftp_chdir;
 use function ftp_close;
@@ -30,9 +31,8 @@ use function ftp_connect;
 use function ftp_login;
 use function ftp_mkdir;
 use function ftp_ssl_connect;
-use function is_resource;
 
-final class FTPConnection extends FTPBase{
+final class FTPConnection extends BaseFTPConnection{
 	private bool $ssl;
 
 	public function __construct(string $host, int $port, string $username, string $password, string $remoteHomePath, bool $ssl){
@@ -44,17 +44,14 @@ final class FTPConnection extends FTPBase{
 		return extension_loaded("ftp");
 	}
 
-	public static function getProtocolName() : string{
+	public function getProtocolName() : string{
 		return "FTP";
 	}
 
-	/**
-	 * @return int|resource
-	 */
-	public function connect(){
+	public function connect() : Connection|int{
 		$ftpConn = $this->ssl ? ftp_ssl_connect($this->host, $this->port) : ftp_connect($this->host, $this->port);
 
-		if(!is_resource($ftpConn)){
+		if($ftpConn === false){
 			return self::ERR_CONNECT;
 		}
 
@@ -82,7 +79,7 @@ final class FTPConnection extends FTPBase{
 	}
 
 	/**
-	 * @param resource $connection
+	 * @param Connection $connection
 	 */
 	public function disconnect($connection) : bool{
 		return ftp_close($connection);

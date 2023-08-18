@@ -25,6 +25,7 @@ namespace matcracker\ServerTools\task\async;
 
 use matcracker\ServerTools\forms\plugins\downloader\SearchPluginForm;
 use matcracker\ServerTools\forms\plugins\downloader\SearchResultsForm;
+use matcracker\ServerTools\Main;
 use pocketmine\Server;
 use function array_filter;
 use function count;
@@ -35,9 +36,15 @@ use const ARRAY_FILTER_USE_BOTH;
 
 final class SearchPluginTask extends GetPoggitReleases{
 
+	private const TLS_KEY_PLUGIN = "PluginInstance";
 
-	public function __construct(private string $nameToSearch, private string $playerName){
-		parent::__construct();
+	public function __construct(
+		Main $plugin,
+		private readonly string $nameToSearch,
+		private readonly string $playerName
+	){
+		parent::__construct($plugin);
+		$this->storeLocal(self::TLS_KEY_PLUGIN, $plugin);
 	}
 
 	public function onRun() : void{
@@ -70,12 +77,17 @@ final class SearchPluginTask extends GetPoggitReleases{
 			return;
 		}
 
+		/** @var Main $plugin */
+		$plugin = $this->fetchLocal(self::TLS_KEY_PLUGIN);
+
 		/** @var string[][] $results */
 		$results = $this->getResult();
 		if(count($results) === 0){
-			$player->sendForm(new SearchPluginForm($this->nameToSearch));
+			$form = new SearchPluginForm($plugin, $this->nameToSearch);
 		}else{
-			$player->sendForm(new SearchResultsForm($results));
+			$form = new SearchResultsForm($plugin, $results);
 		}
+
+		$player->sendForm($form);
 	}
 }

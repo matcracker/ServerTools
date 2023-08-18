@@ -23,49 +23,42 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\forms\cloning;
 
-use matcracker\FormLib\CustomForm;
-use matcracker\FormLib\Form;
-use matcracker\ServerTools\forms\FormManager;
+use dktapps\pmforms\MenuForm;
+use dktapps\pmforms\MenuOption;
+use matcracker\ServerTools\forms\MainMenuForm;
 use matcracker\ServerTools\ftp\FTPConnection;
 use matcracker\ServerTools\ftp\SFTPConnection;
+use matcracker\ServerTools\Main;
+use matcracker\ServerTools\utils\FormUtils;
+use pocketmine\form\FormValidationException;
 use pocketmine\player\Player;
-use UnexpectedValueException;
-use function is_int;
 
-final class CloneForm extends Form{
+final class CloneForm extends MenuForm{
 
-	public function __construct(){
-		parent::__construct(
-			function(Player $player, $data) : void{
-				if(!is_int($data)){
-					throw new UnexpectedValueException("Unexpected value parsed from Form.");
-				}
-
-				if($data === 0){
-					$player->sendForm(SFTPConnection::hasExtension() ? $this->getSFTPForm() : $this->getFTPForm());
-				}elseif($data === 1){
-					$player->sendForm($this->getFTPForm());
-				}
-			},
-			FormManager::onClose(FormManager::getMainMenu())
-		);
-		$this->setTitle("Transfer Mode")
-			->setMessage("Select a mode to send your server data to another one.");
+	public function __construct(Main $plugin){
+		$options = [];
 
 		if(SFTPConnection::hasExtension()){
-			$this->addClassicButton("SFTP");
+			$options[] = new MenuOption("SFTP");
 		}
 
 		if(FTPConnection::hasExtension()){
-			$this->addClassicButton("FTP");
+			$options[] = new MenuOption("FTP");
 		}
-	}
 
-	private function getSFTPForm() : CustomForm{
-		return (new BaseFTPForm("SFTP Settings"));
-	}
-
-	private function getFTPForm() : CustomForm{
-		return (new BaseFTPForm("FTP Settings"))->addToggle("Use SSL", true, "ssl");
+		parent::__construct(
+			"Transfer Mode",
+			"Select a mode to send your server data to another one.",
+			$options,
+			function(Player $player, int $selectedOption) : void{
+				$form = match ($selectedOption) {
+					0 => SFTPConnection::hasExtension() ? new SFTPForm() : new FTPForm(),
+					1 => new SFTPForm(),
+					default => throw new FormValidationException("Unexpected option $selectedOption"),
+				};
+				$player->sendForm($form);
+			},
+			FormUtils::onClose(new MainMenuForm($plugin))
+		);
 	}
 }

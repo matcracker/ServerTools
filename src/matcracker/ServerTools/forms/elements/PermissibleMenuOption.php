@@ -21,32 +21,19 @@
 
 declare(strict_types=1);
 
-namespace matcracker\ServerTools\forms\plugins\manager;
+namespace matcracker\ServerTools\forms\elements;
 
-use dktapps\pmforms\MenuForm;
+use dktapps\pmforms\FormIcon;
 use dktapps\pmforms\MenuOption;
-use matcracker\ServerTools\forms\MainMenuForm;
-use matcracker\ServerTools\Main;
-use matcracker\ServerTools\utils\FormUtils;
-use pocketmine\player\Player;
-use UnexpectedValueException;
 
-final class PluginManagerForm extends MenuForm{
+class PermissibleMenuOption extends MenuOption{
 
-	public function __construct(Main $plugin){
-		parent::__construct(
-			"Plugin Manager",
-			"",
-			[new MenuOption("Enable/Disable plugin")],
-			static function(Player $player, int $selectedOption) use ($plugin) : void{
-				$form = match ($selectedOption) {
-					0 => new PluginEnablerForm($plugin),
-					default => throw new UnexpectedValueException("Unexpected option $selectedOption")
-				};
-
-				$player->sendForm($form);
-			},
-			FormUtils::onClose(new MainMenuForm($plugin))
-		);
+	public function __construct(private readonly string $permission, string $text, ?FormIcon $image = null){
+		parent::__construct($text, $image);
 	}
+
+	public function getPermission() : string{
+		return $this->permission;
+	}
+
 }

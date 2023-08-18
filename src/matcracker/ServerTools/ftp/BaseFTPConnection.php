@@ -23,10 +23,7 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\ftp;
 
-use function str_repeat;
-use function strlen;
-
-abstract class FTPBase{
+abstract class BaseFTPConnection{
 
 	public const ERR_CONNECT = -1;
 	public const ERR_DISCONNECT = -2;
@@ -48,9 +45,9 @@ abstract class FTPBase{
 
 	public abstract static function hasExtension() : bool;
 
-	public abstract static function getProtocolName() : string;
+	public abstract function getProtocolName() : string;
 
-	public abstract function connect();
+	public abstract function connect() : mixed;
 
 	/**
 	 * @param resource $connection
@@ -87,8 +84,7 @@ abstract class FTPBase{
 		return [
 			"host" => $this->host,
 			"port" => $this->port,
-			"username" => $this->username,
-			"password" => str_repeat("*", strlen($this->password))
+			"username" => $this->username
 		];
 	}
 }

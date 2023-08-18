@@ -26,7 +26,6 @@ namespace matcracker\ServerTools\ftp;
 use function extension_loaded;
 use function fclose;
 use function fopen;
-use function is_resource;
 use function ssh2_auth_password;
 use function ssh2_connect;
 use function ssh2_disconnect;
@@ -34,35 +33,41 @@ use function ssh2_sftp;
 use function ssh2_sftp_mkdir;
 use function stream_copy_to_stream;
 
-final class SFTPConnection extends FTPBase{
+final class SFTPConnection extends BaseFTPConnection{
 
 	public static function hasExtension() : bool{
 		return extension_loaded("openssl") && extension_loaded("ssh2");
 	}
 
-	public static function getProtocolName() : string{
+	public function getProtocolName() : string{
 		return "SFTP";
 	}
 
 	/**
 	 * @return int|resource
 	 */
-	public function connect(){
-		$ftpConn = @ssh2_connect($this->host, $this->port);
+	public function connect() : mixed{
+		$session = @ssh2_connect($this->host, $this->port);
 
-		if(!is_resource($ftpConn)){
+		if($session === false){
 			return self::ERR_CONNECT;
 		}
 
-		if(!@ssh2_auth_password($ftpConn, $this->username, $this->password)){
-			if(!@ssh2_disconnect($ftpConn)){
+		if(!@ssh2_auth_password($session, $this->username, $this->password)){
+			if(!@ssh2_disconnect($session)){
 				return self::ERR_DISCONNECT;
 			}
 
 			return self::ERR_LOGIN;
 		}
 
-		return ssh2_sftp($ftpConn);
+		$stream = ssh2_sftp($session);
+
+		if($stream === false){
+			return -3; //TODO
+		}
+
+		return $stream;
 	}
 
 	public function putDirectory($connection, string $remoteDirPath, int $mode = 0644) : bool{

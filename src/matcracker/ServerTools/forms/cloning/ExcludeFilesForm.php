@@ -23,49 +23,68 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\forms\cloning;
 
-use matcracker\FormLib\CustomForm;
-use matcracker\ServerTools\ftp\FTPBase;
+use dktapps\pmforms\CustomForm;
+use dktapps\pmforms\CustomFormResponse;
+use dktapps\pmforms\element\Label;
+use dktapps\pmforms\element\Toggle;
+use matcracker\ServerTools\forms\MainMenuForm;
+use matcracker\ServerTools\ftp\BaseFTPConnection;
+use matcracker\ServerTools\Main;
 use matcracker\ServerTools\task\async\FTPConnectionTask;
+use matcracker\ServerTools\utils\FormUtils;
 use matcracker\ServerTools\utils\Utils;
 use pocketmine\player\Player;
-use pocketmine\Server;
-use function is_string;
+use function assert;
+use function count;
 
 final class ExcludeFilesForm extends CustomForm{
 
-	public function __construct(FTPBase $ftpConnection){
+	private const KEY_EXCLUDE_FILES = "exclude_files";
+
+	public function __construct(Main $plugin, BaseFTPConnection $ftpConnection){
+		$fileList = Utils::getSortedFileList($plugin->getServerDataPath());
+
+		assert($fileList !== null);
+		assert(count($fileList) > 0);
+		$elements = [
+			new Label(self::KEY_EXCLUDE_FILES, "Do you want to exclude something from the clone?")
+		];
+
+		if(isset($fileList["dir"])){
+			foreach($fileList["dir"] as $dir){
+				$elements[] = new Toggle($dir, $dir);
+			}
+		}
+
+		if(isset($fileList["file"])){
+			foreach($fileList["file"] as $file){
+				$elements[] = new Toggle($file, $file);
+			}
+		}
+
 		parent::__construct(
-			static function(Player $player, $data) use ($ftpConnection){
+			"Exclude files",
+			$elements,
+			static function(Player $player, CustomFormResponse $response) use ($plugin, $ftpConnection) : void{
 				/** @var string[] $filter */
 				$filter = [];
 
 				/** @var bool $flag */
-				foreach($data as $file => $flag){
-					if(is_string($file) && $flag){
-						$filter[] = $file;
+				foreach($response->getAll() as $fileNameKey => $fileName){
+					if($fileNameKey === self::KEY_EXCLUDE_FILES){
+						continue;
+					}
+
+					if($response->getBool($fileNameKey)){
+						$filter[] = $fileName;
 					}
 				}
 
-				Server::getInstance()->getAsyncPool()->submitTask(
-					new FTPConnectionTask($ftpConnection, Utils::getServerPath(), $filter, $player->getName())
+				$plugin->getServer()->getAsyncPool()->submitTask(
+					new FTPConnectionTask($ftpConnection, $plugin->getServerDataPath(), $filter, $player->getName())
 				);
-			}
+			},
+			FormUtils::onClose(new MainMenuForm($plugin))
 		);
-
-		$this->setTitle("Exclude files")
-			->addLabel("Do you want to exclude something from the clone?")
-			->addLabel("Server Folders")
-			->addToggle("Players Data", null, "players")
-			->addToggle("Plugins", null, "plugins")
-			->addToggle("Plugins Data", null, "plugins_data")
-			->addToggle("Resource Packs", null, "resource_packs")
-			->addToggle("Worlds", null, "worlds")
-			->addLabel("Server Files")
-			->addToggle("Banned Players", null, "banned-players.txt,banned-ips.txt")
-			->addToggle("Operators (OP)", null, "ops.txt")
-			->addToggle("Configuration", null, "pocketmine.yml")
-			->addToggle("Logs", null, "server.log")
-			->addToggle("Properties", null, "server.properties")
-			->addToggle("White-list", null, "white-list.txt");
 	}
 }

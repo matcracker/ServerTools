@@ -23,97 +23,132 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\forms\files;
 
-use matcracker\FormLib\Form;
-use matcracker\ServerTools\forms\FormManager;
+use dktapps\pmforms\FormIcon;
+use dktapps\pmforms\MenuForm;
+use matcracker\ServerTools\forms\elements\TaggedMenuOption;
+use matcracker\ServerTools\forms\MainMenuForm;
+use matcracker\ServerTools\Main;
+use matcracker\ServerTools\utils\FormUtils;
 use matcracker\ServerTools\utils\Utils;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginException;
 use pocketmine\utils\TextFormat;
+use Symfony\Component\Filesystem\Path;
 use function count;
 use function dirname;
 use function is_dir;
-use const DIRECTORY_SEPARATOR;
 
-final class FileExplorerForm extends Form{
+final class FileExplorerForm extends MenuForm{
 
-	private const NEW_FILE = "/new_file";
-	private const NEW_FOLDER = "/new_folder";
-	private const RENAME_FOLDER = "/rename_folder";
-	private const DELETE_FOLDER = "/delete_folder";
+	private const KEY_BACK = "back";
+	private const KEY_NEW_FILE = "new_file";
+	private const KEY_NEW_FOLDER = "new_folder";
+	private const KEY_RENAME_FOLDER = "rename_folder";
+	private const KEY_DELETE_FOLDER = "delete_folder";
 
-	public function __construct(string $filePath, Player $player){
+	public function __construct(Main $plugin, string $filePath, Player $player){
 		if(!is_dir($filePath)){
 			throw new PluginException("The $filePath must be a folder.");
 		}
 
+		static $BACK_OPTION = new TaggedMenuOption(
+			self::KEY_BACK,
+			"Back",
+			new FormIcon("textures/ui/arrow_dark_left_stretch.png", FormIcon::IMAGE_TYPE_PATH)
+		);
+
 		$fileList = Utils::getSortedFileList($filePath);
 
-		parent::__construct(
-			static function(Player $player, $data) use ($filePath){
-				if($data === FormManager::BACK_LABEL){
-					$form = new self(dirname($filePath), $player);
-				}elseif($data === self::NEW_FOLDER){
-					$form = new NewFolderForm($filePath, $player);
-				}elseif($data === self::NEW_FILE){
-					$form = new NewFileForm($filePath, $player);
-				}elseif($data === self::DELETE_FOLDER){
-					$form = new DeleteFolderForm($filePath, $player);
-				}elseif($data === self::RENAME_FOLDER){
-					$form = new RenameFolderForm($filePath, $player);
-				}else{
-					$nextPath = $filePath . DIRECTORY_SEPARATOR . $data;
-					if(is_dir($nextPath)){
-						$form = new self($nextPath, $player);
-					}else{
-						$form = new FileEditorForm($nextPath, $player);
+		/** @var TaggedMenuOption[] $options */
+		$options = [];
+
+		if($fileList === null){
+			$message = TextFormat::RED . "The directory does not exist.";
+			$options[] = $BACK_OPTION;
+
+		}else{
+			$hasPermission = $player->hasPermission("st.ui.file-explorer.write") || $plugin->canBypassPermission($player);
+
+			if($filePath !== $plugin->getServerDataPath()){
+				$options[] = $BACK_OPTION;
+
+				if($hasPermission){
+					$options[] = new TaggedMenuOption(
+						self::KEY_RENAME_FOLDER,
+						"Rename current folder",
+						new FormIcon("textures/ui/pencil_edit_icon.png", FormIcon::IMAGE_TYPE_PATH)
+					);
+					$options[] = new TaggedMenuOption(
+						self::KEY_DELETE_FOLDER,
+						"Delete current folder",
+						new FormIcon("textures/ui/trash.png", FormIcon::IMAGE_TYPE_PATH)
+					);
+				}
+			}
+
+			if($hasPermission){
+				$options[] = new TaggedMenuOption(
+					self::KEY_NEW_FOLDER,
+					"New folder",
+					new FormIcon("textures/ui/book_addpicture_default.png", FormIcon::IMAGE_TYPE_PATH)
+				);
+				$options[] = new TaggedMenuOption(
+					self::KEY_NEW_FILE,
+					"New file",
+					new FormIcon("textures/ui/book_addtextpage_default.png", FormIcon::IMAGE_TYPE_PATH)
+				);
+			}
+
+			if(count($fileList) === 0){
+				$message =
+					$filePath . TextFormat::EOL .
+					TextFormat::BOLD . TextFormat::GOLD . "[EMPTY FOLDER]";
+
+			}else{
+				$message = $filePath;
+				if(isset($fileList["dir"])){
+					foreach($fileList["dir"] as $dir){
+						$options[] = new TaggedMenuOption(
+							$dir,
+							$dir,
+							new FormIcon("textures/ui/storageIconColor.png", FormIcon::IMAGE_TYPE_PATH)
+						);
 					}
 				}
 
+				if(isset($fileList["file"])){
+					foreach($fileList["file"] as $file){
+						$options[] = new TaggedMenuOption(
+							$file,
+							$file,
+							new FormIcon("textures/items/map_filled.png", FormIcon::IMAGE_TYPE_PATH)
+						);
+					}
+				}
+			}
+		}
+
+		parent::__construct(
+			"File Explorer",
+			$message,
+			$options,
+			static function(Player $player, int $selectedOption) use ($plugin, $options, $filePath) : void{
+				$tag = $options[$selectedOption]->getTag();
+
+				$nextPath = Path::join($filePath, $tag);
+
+				$form = match ($tag) {
+					self::KEY_BACK => new self($plugin, dirname($filePath), $player),
+					self::KEY_NEW_FOLDER => new NewFolderForm($plugin, $filePath, $player),
+					self::KEY_NEW_FILE => new NewFileForm($plugin, $filePath, $player),
+					self::KEY_DELETE_FOLDER => new DeleteFolderForm($plugin, $filePath),
+					self::KEY_RENAME_FOLDER => new RenameFolderForm($plugin, $filePath, $player),
+					default => is_dir($nextPath) ? new self($plugin, $nextPath, $player) : new FileEditorForm($plugin, $nextPath, $player)
+				};
+
 				$player->sendForm($form);
 			},
-			FormManager::onClose(FormManager::getMainMenu())
+			FormUtils::onClose(new MainMenuForm($plugin))
 		);
-		$this->setTitle("File Explorer")
-			->setMessage($filePath);
-
-		if($fileList === null){
-			$this->setMessage(TextFormat::RED . "The directory does not exist.")
-				->addLocalImageButton("Back", "textures/ui/arrow_dark_left_stretch.png", FormManager::BACK_LABEL);
-
-			return;
-		}
-
-		$hasPermission = $player->hasPermission("st.ui.file-explorer.write") || Utils::canBypassPermission($player);
-		if($filePath !== Utils::getServerPath()){
-			$this->addLocalImageButton("Back", "textures/ui/arrow_dark_left_stretch.png", FormManager::BACK_LABEL);
-
-			if($hasPermission){
-				$this->addLocalImageButton("Rename current folder", "textures/ui/pencil_edit_icon.png", self::RENAME_FOLDER)
-					->addLocalImageButton("Delete current folder", "textures/ui/trash.png", self::DELETE_FOLDER);
-			}
-		}
-
-		if($hasPermission){
-			$this->addLocalImageButton("New folder", "textures/ui/book_addpicture_default.png", self::NEW_FOLDER)
-				->addLocalImageButton("New file", "textures/ui/book_addtextpage_default.png", self::NEW_FILE);
-		}
-
-		if(count($fileList) === 0){
-			$this->setMessage($filePath . TextFormat::EOL . TextFormat::BOLD . TextFormat::GOLD . " (Empty Folder)");
-
-			return;
-		}
-
-		if(isset($fileList["dir"])){
-			foreach($fileList["dir"] as $dir){
-				$this->addLocalImageButton($dir, "textures/ui/storageIconColor.png", $dir);
-			}
-		}
-
-		if(isset($fileList["file"])){
-			foreach($fileList["file"] as $file){
-				$this->addLocalImageButton($file, "textures/items/map_filled.png", $file);
-			}
-		}
 	}
 }

@@ -26,6 +26,7 @@ namespace matcracker\ServerTools\task\async;
 use matcracker\ServerTools\Main;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\utils\Internet;
+use Symfony\Component\Filesystem\Path;
 use function explode;
 use function file_exists;
 use function file_get_contents;
@@ -36,25 +37,24 @@ use function json_decode;
 use function json_encode;
 use function max;
 use function time;
-use const DIRECTORY_SEPARATOR;
 
 abstract class GetPoggitReleases extends AsyncTask{
 	protected const POGGIT_JSON_ID = "PoggitJSON";
 	protected const POGGIT_RELEASES_URL = "https://poggit.pmmp.io/releases.min.json";
-
 	private int $timeout;
 	private int $invalidateCacheTime;
-	private string $poggitCacheFile;
+	private string $poggitCachePath;
 
-	public function __construct(){
-		$this->poggitCacheFile = Main::getInstance()->getDataFolder() . DIRECTORY_SEPARATOR . "poggit-api.json";
-		$this->timeout = (int) Main::getInstance()->getConfig()->getNested("poggit.timeout", 30);
-		$this->invalidateCacheTime = (int) max(1, Main::getInstance()->getConfig()->getNested("poggit.invalidate-cache", 24));
+	public function __construct(Main $plugin){
+		$config = $plugin->getConfig();
+		$this->poggitCachePath = Path::join($plugin->getDataFolder(), "poggit-api.json");
+		$this->timeout = (int) $config->getNested("poggit.timeout", 30);
+		$this->invalidateCacheTime = (int) max(1, $config->getNested("poggit.invalidate-cache", 24));
 	}
 
 	public function onRun() : void{
-		if(file_exists($this->poggitCacheFile)){
-			$lastModified = filemtime($this->poggitCacheFile);
+		if(file_exists($this->poggitCachePath)){
+			$lastModified = filemtime($this->poggitCachePath);
 			if($lastModified !== false){
 				$downloadApi = time() - $lastModified > $this->invalidateCacheTime * 3600; //Hours -> Seconds
 			}else{
@@ -89,12 +89,12 @@ abstract class GetPoggitReleases extends AsyncTask{
 							"api-to" => $data["api"][0]["to"] ?? "Unknown"
 						];
 					}
-					file_put_contents($this->poggitCacheFile, json_encode($poggitJson));
+					file_put_contents($this->poggitCachePath, json_encode($poggitJson));
 					$this->storeLocal(self::POGGIT_JSON_ID, $poggitJson);
 				}
 			}
 		}else{
-			$request = file_get_contents($this->poggitCacheFile);
+			$request = file_get_contents($this->poggitCachePath);
 			if($request !== false){
 				$poggitJson = json_decode($request, true);
 				if(is_array($poggitJson)){
@@ -103,5 +103,4 @@ abstract class GetPoggitReleases extends AsyncTask{
 			}
 		}
 	}
-
 }

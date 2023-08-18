@@ -23,37 +23,40 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\forms\plugins\downloader;
 
-use matcracker\FormLib\Form;
-use matcracker\ServerTools\forms\FormManager;
+use dktapps\pmforms\FormIcon;
+use dktapps\pmforms\MenuForm;
+use matcracker\ServerTools\forms\elements\TaggedMenuOption;
+use matcracker\ServerTools\Main;
+use matcracker\ServerTools\utils\FormUtils;
 use pocketmine\player\Player;
-use pocketmine\plugin\PluginException;
-use function array_key_exists;
 use function count;
 
-final class SearchResultsForm extends Form{
+final class SearchResultsForm extends MenuForm{
 
+	/** @var string[][] */
 	private static array $resultsCache = [];
 
-	public function __construct(array $results){
+	public function __construct(Main $plugin, array $results){
+		/** @var TaggedMenuOption[] $options */
+		$options = [];
+
+		foreach($results as $pluginName => $data){
+			$options[] = new TaggedMenuOption($pluginName, $pluginName, new FormIcon($data["icon_url"]));
+		}
+
 		parent::__construct(
-			function(Player $player, $data) use ($results){
-				if(!array_key_exists($data, $results)){
-					throw new PluginException();
-				}
+			count($results) . " Poggit Result(s)",
+			"Select a plugin:",
+			$options,
+			static function(Player $player, int $selectedOption) use ($plugin, $results, $options) : void{
+				$tag = $options[$selectedOption]->getTag();
 
 				self::$resultsCache[$player->getName()] = $results;
 
-				$player->sendForm(new DownloadPluginForm($results[$data], $player->getName()));
+				$player->sendForm(new DownloadPluginForm($plugin, $results[$tag], $player->getName()));
 			},
-			FormManager::onClose(new SearchPluginForm())
+			FormUtils::onClose(new SearchPluginForm($plugin))
 		);
-
-		$this->setTitle(count($results) . " Poggit Result(s)")
-			->setMessage("Select a plugin:");
-
-		foreach($results as $pluginName => $data){
-			$this->addWebImageButton($pluginName, $data["icon_url"], $pluginName);
-		}
 	}
 
 	/**

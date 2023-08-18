@@ -25,29 +25,20 @@ namespace matcracker\ServerTools\utils;
 
 use DirectoryIterator;
 use FilesystemIterator;
-use matcracker\ServerTools\Main;
-use pocketmine\player\Player;
-use pocketmine\Server;
 use pocketmine\utils\Utils as PMUtils;
 use RecursiveCallbackFilterIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
 use function file_exists;
-use function glob;
 use function in_array;
-use function is_file;
-use function mb_substr;
 use function preg_match;
-use function rmdir;
 use function round;
-use function str_replace;
-use function unlink;
 
 final class Utils{
 
 	public static function bytesToHuman(int $size, int $precision = 2) : string{
-		static $units = array('B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+		static $units = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 		$step = 1024;
 		$i = 0;
 		while(($size / $step) > 0.9){
@@ -101,32 +92,8 @@ final class Utils{
 		return $fileList;
 	}
 
-	public static function removeAllFiles(string $path) : bool{
-		$fileList = glob("$path/*");
-		if($fileList === false){
-			return false;
-		}
-
-		foreach($fileList as $file){
-			if(is_file($file)){
-				if(!unlink($file)){
-					return false;
-				}
-			}else{
-				if(!self::removeAllFiles($file)){
-					return false;
-				}
-			}
-		}
-		rmdir($path);
-
-		return true;
-	}
-
 	public static function isValidFileName(string $fileName) : bool{
-		$os = PMUtils::getOS();
-
-		return match ($os) {
+		return match (PMUtils::getOS()) {
 			PMUtils::OS_WINDOWS => self::isValidWindowsFileName($fileName),
 			PMUtils::OS_MACOS, PMUtils::OS_IOS => self::isValidMacFileName($fileName),
 			default => self::isValidUnixFileName($fileName),
@@ -164,14 +131,6 @@ final class Utils{
 		return !str_contains($fileName, "\x00") && preg_match("/[\/]/", $fileName) === 0;
 	}
 
-	public static function getServerPath() : string{
-		return mb_substr(Server::getInstance()->getDataPath(), 0, -1);
-	}
-
-	public static function getUnixPath(string $path) : string{
-		return str_replace("\\", "/", $path);
-	}
-
 	/**
 	 * @param RecursiveIteratorIterator $iterator
 	 *
@@ -207,11 +166,4 @@ final class Utils{
 			), RecursiveIteratorIterator::SELF_FIRST
 		);
 	}
-
-	public static function canBypassPermission(Player $player) : bool{
-		$isOp = Server::getInstance()->isOp($player->getName());
-
-		return $isOp && (bool) Main::getInstance()->getConfig()->get("op-bypass-permissions", false);
-	}
-
 }

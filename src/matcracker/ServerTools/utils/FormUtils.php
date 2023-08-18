@@ -21,46 +21,33 @@
 
 declare(strict_types=1);
 
-namespace matcracker\ServerTools\forms;
+namespace matcracker\ServerTools\utils;
 
 use Closure;
-use matcracker\FormLib\BaseForm;
-use matcracker\FormLib\Form;
-use matcracker\FormLib\ModalForm;
+use dktapps\pmforms\MenuForm;
+use pocketmine\form\Form;
 use pocketmine\player\Player;
 
-final class FormManager{
-	public const BACK_LABEL = "/back";
+final class FormUtils{
 
 	private function __construct(){
 		//NOOP
 	}
 
-	final public static function getConfirmForm(string $title, string $message, ?Closure $onClose = null) : Form{
-		return (new Form(
-			static function(Player $player, $data){
+	public static function getConfirmForm(string $title, string $message, ?Closure $onClose = null) : MenuForm{
+		return (new MenuForm(
+			$title,
+			$message,
+			[],
+			static function(Player $player, int $selectedOption) : void{
 			},
 			$onClose
-		))->setTitle($title)->setMessage($message);
+		));
 	}
 
-	final public static function getYesNoForm(string $title, string $message, Closure $onSubmit, ?Closure $onClose = null) : ModalForm{
-		return (new ModalForm(
-			$onSubmit,
-			$onClose
-		))->setTitle($title)
-			->setMessage($message)
-			->setFirstButton("Yes")
-			->setSecondButton("No");
-	}
-
-	final public static function onClose(BaseForm $form) : Closure{
-		return static function(Player $player) use ($form){
+	public static function onClose(Form $form) : Closure{
+		return static function(Player $player) use ($form) : void{
 			$player->sendForm($form);
 		};
-	}
-
-	final public static function getMainMenu() : Form{
-		return new MainMenuForm();
 	}
 }

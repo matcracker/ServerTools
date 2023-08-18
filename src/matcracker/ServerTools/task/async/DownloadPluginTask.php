@@ -31,18 +31,16 @@ use pocketmine\utils\TextFormat;
 use function file_put_contents;
 
 final class DownloadPluginTask extends AsyncTask{
-	private string $pluginName;
-	private string $artifactUrl;
-	private string $playerName;
-	private string $pluginPath;
 	private int $timeout;
 
-	public function __construct(string $pluginName, string $artifactUrl, string $playerName, string $pluginPath){
-		$this->pluginName = $pluginName;
-		$this->artifactUrl = $artifactUrl;
-		$this->playerName = $playerName;
-		$this->pluginPath = $pluginPath;
-		$this->timeout = (int) Main::getInstance()->getConfig()->getNested("poggit.timeout", 30);
+	public function __construct(
+		Main $plugin,
+		private readonly string $pluginName,
+		private readonly string $artifactUrl,
+		private readonly string $playerName,
+		private readonly string $pluginPath
+	){
+		$this->timeout = (int) $plugin->getConfig()->getNested("poggit.timeout", 30);
 	}
 
 	public function onRun() : void{
@@ -53,8 +51,6 @@ final class DownloadPluginTask extends AsyncTask{
 		}else{
 			$this->setResult(false);
 		}
-
-
 	}
 
 	public function onCompletion() : void{

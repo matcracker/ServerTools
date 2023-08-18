@@ -23,25 +23,25 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\commands;
 
-use matcracker\ServerTools\forms\FormManager;
+use matcracker\ServerTools\forms\MainMenuForm;
 use matcracker\ServerTools\Main;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginOwned;
 use pocketmine\utils\TextFormat;
+use function mb_strtolower;
 
 final class ServerToolsCommand extends Command implements PluginOwned{
-	private Main $plugin;
 
-	public function __construct(Main $plugin){
+	public function __construct(private readonly Main $plugin){
+		$pluginName = $plugin->getName();
 		parent::__construct(
-			'servertools',
-			'Main command for ServerTools plugin.',
-			'/servertools',
-			['servertool', 'st']
+			mb_strtolower($pluginName),
+			"Main command for $pluginName plugin.",
+			"/servertools",
+			["servertool", "st"]
 		);
-		$this->plugin = $plugin;
 		$this->setPermission("st.command.servertools");
 		$this->setPermissionMessage(Main::formatMessage(TextFormat::RED . "You do not have permission to use this command"));
 	}
@@ -57,7 +57,7 @@ final class ServerToolsCommand extends Command implements PluginOwned{
 			return false;
 		}
 
-		$sender->sendForm(FormManager::getMainMenu());
+		$sender->sendForm(new MainMenuForm($this->plugin));
 
 		return true;
 	}

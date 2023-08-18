@@ -23,11 +23,15 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\forms\plugins\downloader;
 
-use matcracker\FormLib\CustomForm;
-use matcracker\ServerTools\forms\FormManager;
+use dktapps\pmforms\CustomForm;
+use dktapps\pmforms\CustomFormResponse;
+use dktapps\pmforms\element\Input;
+use dktapps\pmforms\element\Label;
+use matcracker\ServerTools\forms\MainMenuForm;
+use matcracker\ServerTools\Main;
 use matcracker\ServerTools\task\async\SearchPluginTask;
+use matcracker\ServerTools\utils\FormUtils;
 use pocketmine\player\Player;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use function array_rand;
 
@@ -36,31 +40,40 @@ final class SearchPluginForm extends CustomForm{
 	private const SPONSOR_PLUGINS = [
 		"BedcoreProtect", "ServerTools", "BlocksConverter", "Elevator"
 	];
-	private const SEARCH = "search";
+	private const FORM_KEY_HINT = "hint";
+	private const FORM_KEY_SEARCH = "search";
+	private const FORM_KEY_PL_NOT_FOUND = "plugin_not_found";
 
-	public function __construct(?string $pluginNotFound = null){
-		parent::__construct(
-			function(Player $player, $data) : void{
-				Server::getInstance()->getAsyncPool()->submitTask(
-					new SearchPluginTask($data[self::SEARCH] ?? "", $player->getName())
-				);
-			},
-			FormManager::onClose(FormManager::getMainMenu())
-		);
-		$this->setTitle("Search Poggit Plugin")
-			->addLabel(
+	public function __construct(Main $plugin, ?string $pluginNotFound = null){
+		$elements = [
+			new Label(
+				self::FORM_KEY_HINT,
 				"Hint:" . TextFormat::EOL .
 				"- Use \"@\" to search by author (e.g. @matcracker)"
-			)
-			->addInput(
+			),
+			new Input(
+				self::FORM_KEY_SEARCH,
 				"Insert the plugin name to search:",
-				"e.g. " . self::SPONSOR_PLUGINS[array_rand(self::SPONSOR_PLUGINS)],
-				null,
-				self::SEARCH
-			);
+				"e.g. " . self::SPONSOR_PLUGINS[array_rand(self::SPONSOR_PLUGINS)]
+			)
+		];
 
 		if($pluginNotFound !== null){
-			$this->addLabel(TextFormat::RED . $pluginNotFound . " does not exist on Poggit.");
+			$elements[] = new Label(
+				self::FORM_KEY_PL_NOT_FOUND,
+				TextFormat::RED . $pluginNotFound . " does not exist on Poggit."
+			);
 		}
+
+		parent::__construct(
+			"Search Poggit Plugin",
+			$elements,
+			static function(Player $player, CustomFormResponse $response) use ($plugin) : void{
+				$player->getServer()->getAsyncPool()->submitTask(
+					new SearchPluginTask($plugin, $response->getString(self::FORM_KEY_SEARCH), $player->getName())
+				);
+			},
+			FormUtils::onClose(new MainMenuForm($plugin))
+		);
 	}
 }

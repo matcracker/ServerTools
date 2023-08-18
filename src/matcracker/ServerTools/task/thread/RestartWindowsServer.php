@@ -26,16 +26,12 @@ namespace matcracker\ServerTools\task\thread;
 use pocketmine\thread\Thread;
 use pocketmine\thread\ThreadException;
 use pocketmine\utils\Utils;
-use function is_resource;
 use function proc_close;
 use function proc_open;
 
 final class RestartWindowsServer extends Thread{
 
-	private string $fileName;
-
-	public function __construct(string $fileName){
-		$this->fileName = $fileName;
+	public function __construct(private readonly string $fileName){
 		if(($os = Utils::getOS()) !== Utils::OS_WINDOWS){
 			throw new ThreadException("Could not use this thread on $os OS");
 		}
@@ -44,7 +40,7 @@ final class RestartWindowsServer extends Thread{
 	public function quit() : void{
 		parent::quit();
 		$res = proc_open("start cmd.exe /c \"timeout /t 5 & $this->fileName\"", [], $pipes);
-		if(is_resource($res)){
+		if($res !== false){
 			proc_close($res);
 		}
 	}

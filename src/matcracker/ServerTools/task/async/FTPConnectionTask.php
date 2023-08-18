@@ -24,9 +24,7 @@ declare(strict_types=1);
 namespace matcracker\ServerTools\task\async;
 
 use matcracker\ServerTools\forms\FormManager;
-use matcracker\ServerTools\ftp\FTPBase;
-use matcracker\ServerTools\ftp\FTPConnection;
-use matcracker\ServerTools\ftp\SFTPConnection;
+use matcracker\ServerTools\ftp\BaseFTPConnection;
 use matcracker\ServerTools\Main;
 use matcracker\ServerTools\utils\Utils;
 use pocketmine\scheduler\AsyncTask;
@@ -34,8 +32,11 @@ use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use RuntimeException;
 use SplFileInfo;
+use Symfony\Component\Filesystem\Path;
 use function count;
 use function floor;
+use function igbinary_serialize;
+use function igbinary_unserialize;
 use function implode;
 use function is_array;
 use function is_int;
@@ -58,28 +59,27 @@ final class FTPConnectionTask extends AsyncTask{
 	/**
 	 * AsyncFTPConnection constructor.
 	 *
-	 * @param FTPBase  $ftpConnection
-	 * @param string   $serverPath
-	 * @param string[] $filter
-	 * @param string   $playerName
+	 * @param BaseFTPConnection $ftpConnection
+	 * @param string            $serverPath
+	 * @param string[]          $filter
+	 * @param string            $playerName
 	 */
-	public function __construct(FTPBase $ftpConnection, string $serverPath, array $filter, string $playerName){
+	public function __construct(BaseFTPConnection $ftpConnection, string $serverPath, array $filter, string $playerName){
 		if(!$ftpConnection::hasExtension()){
 			throw new RuntimeException("Missing extension");
 		}
-		$this->ftpConnection = serialize($ftpConnection);
+		$this->ftpConnection = igbinary_serialize($ftpConnection);
 		$this->serverPath = $serverPath;
 		$this->filter = serialize($filter);
 		$this->playerName = $playerName;
-		$this->protocol = $ftpConnection::getProtocolName();
+		$this->protocol = $ftpConnection->getProtocolName();
 	}
 
 	public function onRun() : void{
-		$class = $this->protocol === "FTP" ? FTPConnection::class : SFTPConnection::class;
-		/**@var FTPBase $ftp */
-		$ftp = unserialize($this->ftpConnection, ["allowed_classes" => [$class]]);
+		/**@var BaseFTPConnection $ftpConnection */
+		$ftpConnection = igbinary_unserialize($this->ftpConnection);
 
-		$ftpStream = $ftp->connect();
+		$ftpStream = $ftpConnection->connect();
 
 		if(is_resource($ftpStream)){
 			/**@var string[] $filter */
@@ -95,14 +95,14 @@ final class FTPConnectionTask extends AsyncTask{
 			/**@var SplFileInfo $fileInfo */
 			foreach($iterator as $fileInfo){
 				$localPath = $fileInfo->getRealPath();
-				$remotePath = Utils::getUnixPath($ftp->getHomePath() . str_replace($this->serverPath, "", $localPath));
+				$remotePath = Path::normalize($ftpConnection->getHomePath() . str_replace($this->serverPath, "", $localPath));
 
 				$mode = $fileInfo->getPerms();
 
 				if($fileInfo->isDir()){
-					$ftp->putDirectory($ftpStream, $remotePath, $mode);
+					$ftpConnection->putDirectory($ftpStream, $remotePath, $mode);
 				}else{
-					if(!$ftp->putFile($ftpStream, $localPath, $remotePath, $mode)){
+					if(!$ftpConnection->putFile($ftpStream, $localPath, $remotePath, $mode)){
 						$failedFiles[] = $localPath;
 					}
 
@@ -113,10 +113,10 @@ final class FTPConnectionTask extends AsyncTask{
 				$this->publishProgress($progress);
 			}
 
-			if($ftp->disconnect($ftpStream)){
+			if($ftpConnection->disconnect($ftpStream)){
 				$this->setResult($failedFiles);
 			}else{
-				$this->setResult(FTPBase::ERR_DISCONNECT);
+				$this->setResult(BaseFTPConnection::ERR_DISCONNECT);
 			}
 		}else{
 			$this->setResult($ftpStream);
@@ -148,13 +148,13 @@ final class FTPConnectionTask extends AsyncTask{
 
 		if(is_int($result)){
 			switch($result){
-				case FTPBase::ERR_CONNECT:
+				case BaseFTPConnection::ERR_CONNECT:
 					$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not connect to the " . $this->protocol . " server."));
 					break;
-				case FTPBase::ERR_LOGIN:
+				case BaseFTPConnection::ERR_LOGIN:
 					$player->sendMessage(Main::formatMessage(TextFormat::RED . "Wrong username or password for the " . $this->protocol . " server."));
 					break;
-				case FTPBase::ERR_DISCONNECT:
+				case BaseFTPConnection::ERR_DISCONNECT:
 					$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not disconnect from the " . $this->protocol . " server."));
 					break;
 			}

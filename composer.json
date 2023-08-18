@@ -8,16 +8,9 @@
 			"name": "matcracker"
 		}
 	],
-	"repositories": [
-		{
-			"type": "vcs",
-			"url": "https://github.com/matcracker/FormLib"
-		}
-	],
 	"require": {
 		"pocketmine/pocketmine-mp": "^5.0.0",
-		"dktapps/pmforms": "dev-master",
-		"matcracker/formlib": "dev-master"
+		"dktapps/pmforms": "dev-master"
 	},
 	"require-dev": {
 		"sof3/pharynx": "^0.3.0"

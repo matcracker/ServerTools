@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6eb9969189aeb376c5a8624ee4273315",
+    "content-hash": "7632d405e1299244066f86d414db8c74",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -165,48 +165,6 @@
                 "source": "https://github.com/dktapps-pm-pl/pmforms/tree/master"
             },
             "time": "2023-08-15T19:02:00+00:00"
-        },
-        {
-            "name": "matcracker/formlib",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/matcracker/FormLib.git",
-                "reference": "03bbfb45477e103cd6a112249f25d548eb64d5d3"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/matcracker/FormLib/zipball/03bbfb45477e103cd6a112249f25d548eb64d5d3",
-                "reference": "03bbfb45477e103cd6a112249f25d548eb64d5d3",
-                "shasum": ""
-            },
-            "require": {
-                "pocketmine/pocketmine-mp": "^4.0.0 | ^5.0.0"
-            },
-            "require-dev": {
-                "sof3/pharynx": "^0.3.0"
-            },
-            "default-branch": true,
-            "type": "library",
-            "autoload": {
-                "classmap": [
-                    "src"
-                ]
-            },
-            "license": [
-                "LGPL-3.0"
-            ],
-            "authors": [
-                {
-                    "name": "matcracker"
-                }
-            ],
-            "description": "A simple, safe and extensible API virion library to create forms on PocketMine-MP.",
-            "support": {
-                "source": "https://github.com/matcracker/FormLib/tree/master",
-                "issues": "https://github.com/matcracker/FormLib/issues"
-            },
-            "time": "2023-08-15T15:02:57+00:00"
         },
         {
             "name": "pocketmine/bedrock-block-upgrade-schema",
@@ -3291,8 +3249,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "dktapps/pmforms": 20,
-        "matcracker/formlib": 20
+        "dktapps/pmforms": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

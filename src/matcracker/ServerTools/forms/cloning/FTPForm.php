@@ -21,32 +21,38 @@
 
 declare(strict_types=1);
 
-namespace matcracker\ServerTools\forms\plugins\manager;
+namespace matcracker\ServerTools\forms\cloning;
 
-use dktapps\pmforms\MenuForm;
-use dktapps\pmforms\MenuOption;
-use matcracker\ServerTools\forms\MainMenuForm;
+use dktapps\pmforms\CustomFormResponse;
+use dktapps\pmforms\element\Toggle;
+use matcracker\ServerTools\ftp\BaseFTPConnection;
+use matcracker\ServerTools\ftp\FTPConnection;
 use matcracker\ServerTools\Main;
-use matcracker\ServerTools\utils\FormUtils;
-use pocketmine\player\Player;
-use UnexpectedValueException;
 
-final class PluginManagerForm extends MenuForm{
+class FTPForm extends BaseFTPForm{
+
+	protected const FORM_KEY_SSL = "ssl";
 
 	public function __construct(Main $plugin){
-		parent::__construct(
-			"Plugin Manager",
-			"",
-			[new MenuOption("Enable/Disable plugin")],
-			static function(Player $player, int $selectedOption) use ($plugin) : void{
-				$form = match ($selectedOption) {
-					0 => new PluginEnablerForm($plugin),
-					default => throw new UnexpectedValueException("Unexpected option $selectedOption")
-				};
+		parent::__construct($plugin, "FTP Settings");
+	}
 
-				$player->sendForm($form);
-			},
-			FormUtils::onClose(new MainMenuForm($plugin))
+	protected function getConnection(CustomFormResponse $response) : BaseFTPConnection{
+		return new FTPConnection(
+			$response->getString(self::FORM_KEY_HOST),
+			$response->getInt(self::FORM_KEY_PORT),
+			$response->getString(self::FORM_KEY_USERNAME),
+			$response->getString(self::FORM_KEY_PWD),
+			$response->getString(self::FORM_KEY_PATH),
+			$response->getBool(self::FORM_KEY_SSL)
 		);
+	}
+
+	protected function getFormElements() : array{
+		$elements = parent::getFormElements();
+
+		$elements[] = new Toggle(self::FORM_KEY_SSL, "Use SSL", true);
+
+		return $elements;
 	}
 }

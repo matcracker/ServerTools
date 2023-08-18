@@ -23,8 +23,10 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools;
 
+use matcracker\ServerTools\forms\files\FileEditorForm;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerEditBookEvent;
+use pocketmine\nbt\NoSuchTagException;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\utils\TextFormat;
 use function basename;
@@ -33,7 +35,7 @@ use function is_writable;
 
 final class EventListener implements Listener{
 
-	public function __construct(private Main $plugin){
+	public function __construct(private readonly Main $plugin){
 
 	}
 
@@ -43,9 +45,9 @@ final class EventListener implements Listener{
 		}
 
 		$oldBook = $event->getOldBook();
-		$filePath = $oldBook->getNamedTag()->getString("ServerTools_FilePath", "null");
-
-		if($filePath === "null"){
+		try{
+			$filePath = $oldBook->getNamedTag()->getString(FileEditorForm::FILE_TAG);
+		}catch(NoSuchTagException){
 			return;
 		}
 
@@ -69,11 +71,7 @@ final class EventListener implements Listener{
 			$newBook = $event->getNewBook();
 			//Remove the book from the hotbar
 			$this->plugin->getScheduler()->scheduleDelayedTask(
-				new ClosureTask(
-					static function() use ($player, $newBook) : void{
-						$player?->getInventory()->remove($newBook);
-					}
-				),
+				new ClosureTask(static fn() => $player?->getInventory()->remove($newBook)),
 				1
 			);
 

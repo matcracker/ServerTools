@@ -27,24 +27,31 @@ use JackMD\ConfigUpdater\ConfigUpdater;
 use JackMD\UpdateNotifier\UpdateNotifier;
 use matcracker\ServerTools\commands\ServerToolsCommand;
 use matcracker\ServerTools\task\thread\RestartWindowsServer;
+use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\plugin\PluginException;
+use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use pocketmine\utils\Utils;
+use Symfony\Component\Filesystem\Path;
 use function file_exists;
+use function mb_strtolower;
 use function pcntl_exec;
 use function register_shutdown_function;
+use function sprintf;
+use function var_dump;
 
 final class Main extends PluginBase{
 	private const CONFIG_VERSION = 2;
-	private static ?Main $instance;
+	public const PLUGIN_NAME = "ServerTools";
 
 	public static function formatMessage(string $message) : string{
-		return TextFormat::AQUA . "[ServerTools] " . TextFormat::RESET . $message;
+		return TextFormat::AQUA . sprintf("[%s] ", self::PLUGIN_NAME) . TextFormat::RESET . $message;
 	}
 
 	public function restartServer() : bool{
 		$startFileName = $this->getConfig()->getNested("restart.file-name");
+		var_dump($startFileName);
 
 		if(!file_exists($startFileName)){
 			return false;
@@ -55,11 +62,7 @@ final class Main extends PluginBase{
 		if(Utils::getOS() === Utils::OS_WINDOWS){
 			(new RestartWindowsServer($startFileName))->start();
 		}else{
-			register_shutdown_function(
-				static function() use ($startFileName) : void{
-					pcntl_exec("./$startFileName");
-				}
-			);
+			register_shutdown_function(static fn() => pcntl_exec("./$startFileName"));
 		}
 
 		$this->getServer()->shutdown();
@@ -68,28 +71,34 @@ final class Main extends PluginBase{
 	}
 
 	public function onLoad() : void{
-		self::$instance = $this;
-
 		UpdateNotifier::checkUpdate($this->getName(), $this->getDescription()->getVersion());
 	}
 
 	public function onEnable() : void{
 		ConfigUpdater::checkUpdate($this, $this->getConfig(), "config-version", self::CONFIG_VERSION);
 
-		$this->getServer()->getCommandMap()->register("servertools", new ServerToolsCommand($this));
+		$this->getServer()->getCommandMap()->register(mb_strtolower($this->getName()), new ServerToolsCommand($this));
 		$this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
 	}
 
-	public function onDisable() : void{
-		self::$instance = null;
+	public function getServerDataPath() : string{
+		return Path::canonicalize($this->getServer()->getDataPath());
+	}
+
+	public function canBypassPermission(Player $player) : bool{
+		$isOp = $this->getServer()->isOp($player->getName());
+
+		return $isOp && $this->getConfig()->get("op-bypass-permissions");
 	}
 
 	public static function getInstance() : Main{
-		if(self::$instance === null){
-			throw new PluginException("ServerTools instance could not be accessed because it is disabled or not loaded yet.");
+		$instance = Server::getInstance()->getPluginManager()->getPlugin(self::PLUGIN_NAME);
+
+		if(!($instance instanceof Main)){
+			throw new PluginException(sprintf("%s instance could not be accessed because it is disabled or not loaded yet.", self::PLUGIN_NAME));
 		}
 
-		return self::$instance;
+		return $instance;
 	}
 
 }

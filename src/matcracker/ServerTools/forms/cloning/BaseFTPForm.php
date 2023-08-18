@@ -23,57 +23,48 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\forms\cloning;
 
-use matcracker\FormLib\CustomForm;
-use matcracker\ServerTools\forms\FormManager;
-use matcracker\ServerTools\ftp\FTPConnection;
-use matcracker\ServerTools\ftp\SFTPConnection;
+use dktapps\pmforms\CustomForm;
+use dktapps\pmforms\CustomFormResponse;
+use dktapps\pmforms\element\CustomFormElement;
+use dktapps\pmforms\element\Input;
+use dktapps\pmforms\element\Label;
+use dktapps\pmforms\element\Slider;
+use matcracker\ServerTools\forms\MainMenuForm;
+use matcracker\ServerTools\ftp\BaseFTPConnection;
 use matcracker\ServerTools\Main;
+use matcracker\ServerTools\utils\FormUtils;
 use pocketmine\player\Player;
-use pocketmine\utils\TextFormat;
-use function is_numeric;
 
-final class BaseFTPForm extends CustomForm{
+abstract class BaseFTPForm extends CustomForm{
+	protected const FORM_KEY_LABEL = "label";
+	protected const FORM_KEY_HOST = "host";
+	protected const FORM_KEY_PORT = "port";
+	protected const FORM_KEY_USERNAME = "username";
+	protected const FORM_KEY_PWD = "password";
+	protected const FORM_KEY_PATH = "remote_path";
 
-	public function __construct(string $title){
+	public function __construct(Main $plugin, string $title){
 		parent::__construct(
-			static function(Player $player, $data) : void{
-				$host = (string) $data["host"];
-
-				if(!is_numeric($data["port"])){
-					$player->sendMessage(Main::formatMessage(TextFormat::RED . "You must insert a numeric value to the field \"Port\""));
-
-					return;
-				}
-
-				$port = (int) $data["port"];
-				if($port < 0 || $port > 65535){
-					$player->sendMessage(Main::formatMessage(TextFormat::RED . "Invalid port range! It must be between 0 and 65535."));
-
-					return;
-				}
-
-				$username = (string) $data["username"];
-				$password = (string) $data["password"];
-				$remoteHomePath = (string) $data["remote_path"];
-
-				if(isset($data["ssl"])){
-					$ssl = (bool) $data["ssl"];
-					$ftpConnection = new FTPConnection($host, $port, $username, $password, $remoteHomePath, $ssl);
-				}else{
-					$ftpConnection = new SFTPConnection($host, $port, $username, $password, $remoteHomePath);
-				}
-
-				$player->sendForm(new ExcludeFilesForm($ftpConnection));
-			},
-			FormManager::onClose(FormManager::getMainMenu())
+			$title,
+			$this->getFormElements(),
+			fn(Player $player, CustomFormResponse $response) => $player->sendForm(new ExcludeFilesForm($this->getConnection($response))),
+			FormUtils::onClose(new MainMenuForm($plugin))
 		);
+	}
 
-		$this->setTitle($title)
-			->addLabel("The following form will not immediately validated.")
-			->addInput("Host address", label: "host")
-			->addInput("Port", "21", label: "port")
-			->addInput("Username", "admin", label: "username")
-			->addInput("Password", "**********", label: "password")
-			->addInput("Remote home path", "/", label: "remote_path");
+	protected abstract function getConnection(CustomFormResponse $response) : BaseFTPConnection;
+
+	/**
+	 * @return CustomFormElement[]
+	 */
+	protected function getFormElements() : array{
+		return [
+			new Label(self::FORM_KEY_LABEL, "The following form will not immediately validated."),
+			new Input(self::FORM_KEY_HOST, "Host address"),
+			new Slider(self::FORM_KEY_PORT, "Port", 1, 65535, default: 21),
+			new Input(self::FORM_KEY_USERNAME, "Username", "admin"),
+			new Input(self::FORM_KEY_PWD, "Password"),
+			new Input(self::FORM_KEY_PATH, "Remote home path", defaultText: "/")
+		];
 	}
 }

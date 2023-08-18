@@ -21,32 +21,26 @@
 
 declare(strict_types=1);
 
-namespace matcracker\ServerTools\forms\plugins\manager;
+namespace matcracker\ServerTools\forms\cloning;
 
-use dktapps\pmforms\MenuForm;
-use dktapps\pmforms\MenuOption;
-use matcracker\ServerTools\forms\MainMenuForm;
+use dktapps\pmforms\CustomFormResponse;
+use matcracker\ServerTools\ftp\BaseFTPConnection;
+use matcracker\ServerTools\ftp\SFTPConnection;
 use matcracker\ServerTools\Main;
-use matcracker\ServerTools\utils\FormUtils;
-use pocketmine\player\Player;
-use UnexpectedValueException;
 
-final class PluginManagerForm extends MenuForm{
+class SFTPForm extends BaseFTPForm{
 
 	public function __construct(Main $plugin){
-		parent::__construct(
-			"Plugin Manager",
-			"",
-			[new MenuOption("Enable/Disable plugin")],
-			static function(Player $player, int $selectedOption) use ($plugin) : void{
-				$form = match ($selectedOption) {
-					0 => new PluginEnablerForm($plugin),
-					default => throw new UnexpectedValueException("Unexpected option $selectedOption")
-				};
+		parent::__construct($plugin, "SFTP Settings");
+	}
 
-				$player->sendForm($form);
-			},
-			FormUtils::onClose(new MainMenuForm($plugin))
+	protected function getConnection(CustomFormResponse $response) : BaseFTPConnection{
+		return new SFTPConnection(
+			$response->getString(self::FORM_KEY_HOST),
+			$response->getInt(self::FORM_KEY_PORT),
+			$response->getString(self::FORM_KEY_USERNAME),
+			$response->getString(self::FORM_KEY_PWD),
+			$response->getString(self::FORM_KEY_PATH)
 		);
 	}
 }

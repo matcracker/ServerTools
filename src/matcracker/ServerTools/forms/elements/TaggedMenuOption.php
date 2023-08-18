@@ -1,7 +1,7 @@
 <?php
 
 /*
- *	  _________                              ___________           .__
+ *    _________                              ___________           .__
  *	 /   _____/ ______________  __ __________\__    ___/___   ____ |  |   ______
  *	 \_____  \_/ __ \_  __ \  \/ // __ \_  __ \|    | /  _ \ /  _ \|  |  /  ___/
  *	 /        \  ___/|  | \/\   /\  ___/|  | \/|    |(  <_> |  <_> )  |__\___ \
@@ -21,30 +21,19 @@
 
 declare(strict_types=1);
 
-namespace matcracker\ServerTools\forms;
+namespace matcracker\ServerTools\forms\elements;
 
-use matcracker\FormLib\CustomForm;
-use matcracker\FormLib\Form;
+use dktapps\pmforms\FormIcon;
+use dktapps\pmforms\MenuOption;
 
-final class SettingsFormManager extends Form{
+class TaggedMenuOption extends MenuOption{
 
-	public function __construct(){
-		parent::__construct(
-			static function(Player $player, $data) : void{
-
-			},
-			FormManager::onClose(FormManager::getMainMenu())
-		);
-		$this->setTitle("ServerTools Settings")
-			->addClassicButton("File Explorer");
+	public function __construct(private readonly string $tag, string $text, ?FormIcon $image = null){
+		parent::__construct($text, $image);
 	}
 
-	private function getFileExplorerSettings() : CustomForm{
-		return (new CustomForm(
-			static function(Player $player, $data) : void{
-
-			},
-			FormManager::onClose(FormManager::getMainMenu())
-		))->addToggle("Show file extension");
+	public function getTag() : string{
+		return $this->tag;
 	}
+
 }

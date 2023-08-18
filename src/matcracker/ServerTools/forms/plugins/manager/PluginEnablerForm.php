@@ -23,30 +23,34 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\forms\plugins\manager;
 
-use matcracker\FormLib\Form;
-use matcracker\ServerTools\forms\FormManager;
+use dktapps\pmforms\MenuForm;
+use dktapps\pmforms\MenuOption;
 use matcracker\ServerTools\Main;
+use matcracker\ServerTools\utils\FormUtils;
 use pocketmine\player\Player;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
-use function array_key_exists;
 use function array_values;
 
-final class PluginEnablerForm extends Form{
+final class PluginEnablerForm extends MenuForm{
 
-	public function __construct(){
-		$pluginManager = Server::getInstance()->getPluginManager();
+	public function __construct(Main $plugin){
+		$pluginManager = $plugin->getServer()->getPluginManager();
 		$plugins = array_values($pluginManager->getPlugins());
 
+		$options = [];
+		foreach($plugins as $pl){
+			$version = $pl->getDescription()->getVersion();
+			$options[] = new MenuOption(($pl->isEnabled() ? TextFormat::DARK_GREEN : TextFormat::RED) . "{$pl->getName()} v$version");
+		}
+
 		parent::__construct(
-			static function(Player $player, $data) use ($pluginManager, $plugins) : void{
-				if(!array_key_exists((int) $data, $plugins)){
-					$player->sendMessage(Main::formatMessage(TextFormat::RED . "Plugin does not exist."));
-
-					return;
-				}
-
-				$plugin = $plugins[$data];
+			"Enable/Disable Plugins",
+			TextFormat::BOLD . TextFormat::GOLD . "WARNING! USE THIS FUNCTION CAREFULLY:" . TextFormat::EOL .
+			TextFormat::RESET . TextFormat::GOLD . "- The plugin commands will still remain usable (they could cause a crash if used)." . TextFormat::EOL .
+			"- Disabling and re-enabling a plugin could cause your server to crash.",
+			$options,
+			static function(Player $player, int $selectedOption) use ($pluginManager, $plugins) : void{
+				$plugin = $plugins[$selectedOption];
 				if($plugin->isEnabled()){
 					$pluginManager->disablePlugin($plugin);
 					$player->sendMessage(Main::formatMessage(TextFormat::RED . "The plugin {$plugin->getName()} has been disabled."));
@@ -55,18 +59,7 @@ final class PluginEnablerForm extends Form{
 					$player->sendMessage(Main::formatMessage(TextFormat::GREEN . "The plugin {$plugin->getName()} has been enabled."));
 				}
 			},
-			FormManager::onClose(new PluginManagerForm())
+			FormUtils::onClose(new PluginManagerForm($plugin))
 		);
-		$this->setTitle("Enable/Disable Plugins")
-			->setMessage(
-				TextFormat::BOLD . TextFormat::GOLD . "WARNING! USE THIS FUNCTION CAREFULLY:" . TextFormat::EOL .
-				TextFormat::RESET . TextFormat::GOLD . "- The plugin commands will still remain usable (they could cause a crash if used)." . TextFormat::EOL .
-				"- Disabling and re-enabling a plugin could cause your server to crash."
-			);
-
-		foreach($plugins as $plugin){
-			$version = $plugin->getDescription()->getVersion();
-			$this->addClassicButton(($plugin->isEnabled() ? TextFormat::DARK_GREEN : TextFormat::RED) . "{$plugin->getName()} v$version");
-		}
 	}
 }

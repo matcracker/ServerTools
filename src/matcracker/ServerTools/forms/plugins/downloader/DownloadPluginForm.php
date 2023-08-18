@@ -23,27 +23,36 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\forms\plugins\downloader;
 
-use matcracker\FormLib\CustomForm;
-use matcracker\ServerTools\forms\FormManager;
+use dktapps\pmforms\CustomForm;
+use dktapps\pmforms\CustomFormResponse;
+use dktapps\pmforms\element\Dropdown;
+use dktapps\pmforms\element\Label;
+use matcracker\ServerTools\Main;
 use matcracker\ServerTools\task\async\DownloadPluginTask;
+use matcracker\ServerTools\utils\FormUtils;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginException;
-use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 use function array_values;
 use function count;
 
 final class DownloadPluginForm extends CustomForm{
 
-	private const SELECTED_VERSION = "version";
+	private const KEY_DESCRIPTION = "description";
+	private const KEY_AUTHOR = "author";
+	private const KEY_LICENSE = "license";
+	private const KEY_VERSION = "version";
+	private const KEY_API = "api";
+	private const KEY_SUBMIT = "submit";
 
 	/**
 	 * DownloadPluginForm constructor.
 	 *
+	 * @param Main   $plugin
 	 * @param array  $poggitData
 	 * @param string $playerName
 	 */
-	public function __construct(array $poggitData, string $playerName){
+	public function __construct(Main $plugin, array $poggitData, string $playerName){
 		if(count($poggitData) === 0){
 			throw new PluginException();
 		}
@@ -57,27 +66,32 @@ final class DownloadPluginForm extends CustomForm{
 			$versions[] = "v$version (API: {$apiData["api-from"]} - {$apiData["api-to"]})";
 		}
 
+		$serverApi = $plugin->getServer()->getApiVersion();
+
 		parent::__construct(
-			function(Player $player, $data) use ($poggitData) : void{
-				$versionData = array_values($poggitData["versions"])[(int) $data[self::SELECTED_VERSION]];
+			"{$poggitData["name"]} Information",
+			[
+				new Label(self::KEY_DESCRIPTION, TextFormat::BOLD . $poggitData["short_description"]),
+				new Label(self::KEY_AUTHOR, "Author(s): {$poggitData["authors"]}"),
+				new Label(self::KEY_LICENSE, "License: {$poggitData["license"]}"),
+				new Dropdown(self::KEY_VERSION, "Select the version", $versions),
+				new Label(self::KEY_API, TextFormat::BOLD . TextFormat::GOLD . "Server API version: $serverApi"),
+				new Label(self::KEY_SUBMIT, "Press \"Submit\" to start the download.")
+			],
+			static function(Player $player, CustomFormResponse $response) use ($plugin, $poggitData) : void{
+				$versionData = array_values($poggitData["versions"])[$response->getInt(self::KEY_VERSION)];
 
-				$server = Server::getInstance();
-				$server->getAsyncPool()->submitTask(
-					new DownloadPluginTask($poggitData["name"], $versionData["artifact_url"], $player->getName(), $server->getPluginPath())
-				);
+				$server = $player->getServer();
+				$server->getAsyncPool()->submitTask(new DownloadPluginTask(
+														$plugin,
+														$poggitData["name"],
+														$versionData["artifact_url"],
+														$player->getName(),
+														$server->getPluginPath()
+													));
 			},
-			FormManager::onClose(new SearchResultsForm(SearchResultsForm::getResultsCache($playerName)))
+			FormUtils::onClose(new SearchResultsForm($plugin, SearchResultsForm::getResultsCache($playerName)))
 		);
-
-		$serverApi = Server::getInstance()->getApiVersion();
-
-		$this->setTitle("{$poggitData["name"]} Information")
-			->addLabel(TextFormat::BOLD . $poggitData["short_description"])
-			->addLabel("Author(s): {$poggitData["authors"]}")
-			->addLabel("License: {$poggitData["license"]}")
-			->addDropdown("Select the version", $versions, null, self::SELECTED_VERSION)
-			->addLabel(TextFormat::BOLD . TextFormat::GOLD . "Server API version: $serverApi")
-			->addLabel("Press \"Submit\" to start the download.");
 	}
 
 }
