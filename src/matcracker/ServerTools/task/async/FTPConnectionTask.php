@@ -23,10 +23,11 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\task\async;
 
-use matcracker\ServerTools\forms\FormManager;
 use matcracker\ServerTools\ftp\BaseFTPConnection;
 use matcracker\ServerTools\Main;
+use matcracker\ServerTools\utils\FormUtils;
 use matcracker\ServerTools\utils\Utils;
+use pmmp\thread\ThreadSafeArray;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
@@ -34,25 +35,23 @@ use RuntimeException;
 use SplFileInfo;
 use Symfony\Component\Filesystem\Path;
 use function count;
-use function floor;
 use function igbinary_serialize;
 use function igbinary_unserialize;
 use function implode;
 use function is_array;
 use function is_int;
-use function is_resource;
-use function serialize;
+use function iterator_to_array;
+use function round;
 use function str_repeat;
-use function str_replace;
-use function unserialize;
 
 final class FTPConnectionTask extends AsyncTask{
 
+	private const PROGRESSBAR_SYMBOL = "■";
 	private const PROGRESSBAR_SIZE = 25;
 
 	private string $ftpConnection;
 	private string $serverPath;
-	private string $filter;
+	private ThreadSafeArray $filter;
 	private string $playerName;
 	private string $protocol;
 
@@ -70,7 +69,7 @@ final class FTPConnectionTask extends AsyncTask{
 		}
 		$this->ftpConnection = igbinary_serialize($ftpConnection);
 		$this->serverPath = $serverPath;
-		$this->filter = serialize($filter);
+		$this->filter = ThreadSafeArray::fromArray($filter);
 		$this->playerName = $playerName;
 		$this->protocol = $ftpConnection->getProtocolName();
 	}
@@ -79,45 +78,51 @@ final class FTPConnectionTask extends AsyncTask{
 		/**@var BaseFTPConnection $ftpConnection */
 		$ftpConnection = igbinary_unserialize($this->ftpConnection);
 
+		/** @var int|resource $ftpStream */
 		$ftpStream = $ftpConnection->connect();
 
-		if(is_resource($ftpStream)){
-			/**@var string[] $filter */
-			$filter = unserialize($this->filter);
-			$iterator = Utils::getRecursiveIterator($this->serverPath, $filter);
-			$totalBytes = Utils::getIteratorSize($iterator);
+		if(!is_int($ftpStream)){
+			/** @var SplFileInfo[] $files */
+			$files = iterator_to_array(Utils::getRecursiveIterator(
+				$this->serverPath, iterator_to_array($this->filter)
+			));
+
+			$totalBytes = 0;
+
+			foreach($files as $fileInfo){
+				$totalBytes += $fileInfo->getSize();
+			}
 
 			$failedFiles = [];
 			$sentBytes = 0;
 
 			$this->publishProgress(0);
 
-			/**@var SplFileInfo $fileInfo */
-			foreach($iterator as $fileInfo){
+			foreach($files as $fileInfo){
 				$localPath = $fileInfo->getRealPath();
-				$remotePath = Path::normalize($ftpConnection->getHomePath() . str_replace($this->serverPath, "", $localPath));
+				$remotePath = Path::join($ftpConnection->getHomePath(), Path::makeRelative($localPath, $this->serverPath));
 
 				$mode = $fileInfo->getPerms();
 
 				if($fileInfo->isDir()){
-					$ftpConnection->putDirectory($ftpStream, $remotePath, $mode);
+					if(!$ftpConnection->putDirectory($ftpStream, $remotePath, $mode)){
+						$failedFiles[] = $remotePath;
+					}
 				}else{
-					if(!$ftpConnection->putFile($ftpStream, $localPath, $remotePath, $mode)){
+					if(!$ftpConnection->putFile($ftpStream, $localPath, $remotePath)){
 						$failedFiles[] = $localPath;
 					}
 
 					$sentBytes += $fileInfo->getSize();
 				}
 
-				$progress = (int) floor(($sentBytes / $totalBytes) * self::PROGRESSBAR_SIZE);
-				$this->publishProgress($progress);
+				$percentage = round(($sentBytes / $totalBytes) * 100.0, 1);
+				$this->publishProgress($percentage);
 			}
 
-			if($ftpConnection->disconnect($ftpStream)){
-				$this->setResult($failedFiles);
-			}else{
-				$this->setResult(BaseFTPConnection::ERR_DISCONNECT);
-			}
+			$this->setResult($failedFiles);
+
+			$ftpConnection->disconnect($ftpStream);
 		}else{
 			$this->setResult($ftpStream);
 		}
@@ -128,12 +133,12 @@ final class FTPConnectionTask extends AsyncTask{
 			return;
 		}
 
-		$percentage = (int) floor(($progress / self::PROGRESSBAR_SIZE) * 100);
+		$steps = (int) (($progress / 100.0) * self::PROGRESSBAR_SIZE);
 
 		$bar = TextFormat::YELLOW . "Cloning Progress" . TextFormat::EOL . //Title
-			TextFormat::WHITE . "[" . TextFormat::GREEN . str_repeat("|", $progress) . //Current progress
-			TextFormat::RED . str_repeat("|", self::PROGRESSBAR_SIZE - $progress) . TextFormat::WHITE . "] " .//Remaining progress
-			TextFormat::AQUA . "$percentage %%"; //Percentage
+			TextFormat::WHITE . "[" . TextFormat::GREEN . str_repeat(self::PROGRESSBAR_SYMBOL, $steps) . //Current progress
+			TextFormat::RED . str_repeat(self::PROGRESSBAR_SYMBOL, self::PROGRESSBAR_SIZE - $steps) . TextFormat::WHITE . "] " .//Remaining progress
+			TextFormat::AQUA . "$progress %%"; //Percentage
 
 		$player->sendTip($bar);
 	}
@@ -160,7 +165,7 @@ final class FTPConnectionTask extends AsyncTask{
 			}
 		}elseif(is_array($result)){
 			if(count($result) > 0){
-				$player->sendForm(FormManager::getConfirmForm("Not uploaded files", TextFormat::RED . "- " . implode("\n- ", $result)));
+				$player->sendForm(FormUtils::getConfirmForm("Not uploaded files", TextFormat::RED . "- " . implode("\n- ", $result)));
 			}else{
 				$player->sendMessage(Main::formatMessage(TextFormat::GREEN . "Cloning process has been completed."));
 			}

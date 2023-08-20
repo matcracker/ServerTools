@@ -50,10 +50,10 @@ final class CloneForm extends MenuForm{
 			"Transfer Mode",
 			"Select a mode to send your server data to another one.",
 			$options,
-			function(Player $player, int $selectedOption) : void{
+			function(Player $player, int $selectedOption) use($plugin) : void{
 				$form = match ($selectedOption) {
-					0 => SFTPConnection::hasExtension() ? new SFTPForm() : new FTPForm(),
-					1 => new SFTPForm(),
+					0 => SFTPConnection::hasExtension() ? new SFTPForm($plugin) : new FTPForm($plugin),
+					1 => new SFTPForm($plugin),
 					default => throw new FormValidationException("Unexpected option $selectedOption"),
 				};
 				$player->sendForm($form);

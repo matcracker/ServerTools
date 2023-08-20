@@ -28,7 +28,6 @@ use dktapps\pmforms\CustomFormResponse;
 use dktapps\pmforms\element\CustomFormElement;
 use dktapps\pmforms\element\Input;
 use dktapps\pmforms\element\Label;
-use dktapps\pmforms\element\Slider;
 use matcracker\ServerTools\forms\MainMenuForm;
 use matcracker\ServerTools\ftp\BaseFTPConnection;
 use matcracker\ServerTools\Main;
@@ -47,7 +46,9 @@ abstract class BaseFTPForm extends CustomForm{
 		parent::__construct(
 			$title,
 			$this->getFormElements(),
-			fn(Player $player, CustomFormResponse $response) => $player->sendForm(new ExcludeFilesForm($this->getConnection($response))),
+			function(Player $player, CustomFormResponse $response) use ($plugin) : void{
+				$player->sendForm(new ExcludeFilesForm($plugin, $this->getConnection($response)));
+			},
 			FormUtils::onClose(new MainMenuForm($plugin))
 		);
 	}

@@ -54,7 +54,7 @@ abstract class BaseFTPConnection{
 	 */
 	public abstract function disconnect($connection) : bool;
 
-	public abstract function putFile($connection, string $localFile, string $remoteFile, int $mode = 0644) : bool;
+	public abstract function putFile($connection, string $localFile, string $remoteFile) : bool;
 
 	public abstract function putDirectory($connection, string $remoteDirPath, int $mode = 0644) : bool;
 

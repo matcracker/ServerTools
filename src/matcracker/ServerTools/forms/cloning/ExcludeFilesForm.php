@@ -42,25 +42,21 @@ final class ExcludeFilesForm extends CustomForm{
 	private const KEY_EXCLUDE_FILES = "exclude_files";
 
 	public function __construct(Main $plugin, BaseFTPConnection $ftpConnection){
-		$fileList = Utils::getSortedFileList($plugin->getServerDataPath());
-
-		assert($fileList !== null);
-		assert(count($fileList) > 0);
 		$elements = [
 			new Label(self::KEY_EXCLUDE_FILES, "Do you want to exclude something from the clone?")
 		];
 
-		if(isset($fileList["dir"])){
-			foreach($fileList["dir"] as $dir){
-				$elements[] = new Toggle($dir, $dir);
-			}
+		$files = Utils::getSortedFileList($plugin->getServerDataPath());
+
+		foreach($files["dir"] as $dir){
+			$elements[] = new Toggle($dir, $dir);
 		}
 
-		if(isset($fileList["file"])){
-			foreach($fileList["file"] as $file){
-				$elements[] = new Toggle($file, $file);
-			}
+		foreach($files["file"] as $file){
+			$elements[] = new Toggle($file, $file);
 		}
+
+		assert(count($elements) > 1);
 
 		parent::__construct(
 			"Exclude files",
@@ -69,15 +65,20 @@ final class ExcludeFilesForm extends CustomForm{
 				/** @var string[] $filter */
 				$filter = [];
 
-				/** @var bool $flag */
-				foreach($response->getAll() as $fileNameKey => $fileName){
+				foreach($response->getAll() as $fileNameKey => $toggled){
 					if($fileNameKey === self::KEY_EXCLUDE_FILES){
 						continue;
 					}
 
-					if($response->getBool($fileNameKey)){
-						$filter[] = $fileName;
+					if($toggled){
+						$filter[] = $fileNameKey;
 					}
+				}
+
+				$worlds = $plugin->getServer()->getWorldManager()->getWorlds();
+
+				foreach($worlds as $world){
+					$world->save(true);
 				}
 
 				$plugin->getServer()->getAsyncPool()->submitTask(

@@ -37,7 +37,7 @@ class SFTPForm extends BaseFTPForm{
 	protected function getConnection(CustomFormResponse $response) : BaseFTPConnection{
 		return new SFTPConnection(
 			$response->getString(self::FORM_KEY_HOST),
-			$response->getInt(self::FORM_KEY_PORT),
+			(int) $response->getString(self::FORM_KEY_PORT),
 			$response->getString(self::FORM_KEY_USERNAME),
 			$response->getString(self::FORM_KEY_PWD),
 			$response->getString(self::FORM_KEY_PATH)

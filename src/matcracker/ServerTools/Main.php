@@ -39,7 +39,6 @@ use function mb_strtolower;
 use function pcntl_exec;
 use function register_shutdown_function;
 use function sprintf;
-use function var_dump;
 
 final class Main extends PluginBase{
 	private const CONFIG_VERSION = 2;
@@ -51,7 +50,6 @@ final class Main extends PluginBase{
 
 	public function restartServer() : bool{
 		$startFileName = $this->getConfig()->getNested("restart.file-name");
-		var_dump($startFileName);
 
 		if(!file_exists($startFileName)){
 			return false;

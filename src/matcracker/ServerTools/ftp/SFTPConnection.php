@@ -61,10 +61,10 @@ final class SFTPConnection extends BaseFTPConnection{
 			return self::ERR_LOGIN;
 		}
 
-		$stream = ssh2_sftp($session);
+		$stream = @ssh2_sftp($session);
 
 		if($stream === false){
-			return -3; //TODO
+			return self::ERR_CONNECT;
 		}
 
 		return $stream;
@@ -74,13 +74,13 @@ final class SFTPConnection extends BaseFTPConnection{
 		return @ssh2_sftp_mkdir($connection, $remoteDirPath, $mode);
 	}
 
-	public function putFile($connection, string $localFile, string $remoteFile, int $mode = 0644) : bool{
-		$localRes = @fopen($localFile, 'rb');
+	public function putFile($connection, string $localFile, string $remoteFile) : bool{
+		$localRes = @fopen($localFile, "rb");
 		if($localRes === false){
 			return false;
 		}
 
-		$remoteRes = @fopen("ssh2.sftp://$connection$remoteFile", 'wb');
+		$remoteRes = @fopen("ssh2.sftp://$connection$remoteFile", "wb");
 		if($remoteRes === false){
 			return false;
 		}

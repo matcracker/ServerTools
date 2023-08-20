@@ -34,6 +34,7 @@ use function file_exists;
 use function in_array;
 use function preg_match;
 use function round;
+use function var_dump;
 
 final class Utils{
 
@@ -61,31 +62,29 @@ final class Utils{
 	 */
 	public static function getSortedFileList(string $path) : ?array{
 		if(!file_exists($path)){
-			return null;
+			return [];
 		}
 
-		$fileList = [];
 		$dirIterator = new DirectoryIterator($path);
 		if(!$dirIterator->valid()){
-			return $fileList;
+			return [];
 		}
 
-		$btnIdx = 0;
+		$fileList = [
+			"dir" => [],
+			"file" => []
+		];
+
 		foreach($dirIterator as $fileInfo){
-			$name = $fileInfo->getFilename();
-			if($fileInfo->isDir() && !$fileInfo->isDot()){
-				$fileList["dir"][$btnIdx] = $name;
-				$btnIdx++;
+			if($fileInfo->isDot()){
+				continue;
 			}
-		}
 
-		$dirIterator->rewind();
-
-		foreach($dirIterator as $fileInfo){
 			$name = $fileInfo->getFilename();
-			if(!$fileInfo->isDir()){
-				$fileList["file"][$btnIdx] = $name;
-				$btnIdx++;
+			if($fileInfo->isDir()){
+				$fileList["dir"][] = $name;
+			}else{
+				$fileList["file"][] = $name;
 			}
 		}
 
@@ -132,21 +131,6 @@ final class Utils{
 	}
 
 	/**
-	 * @param RecursiveIteratorIterator $iterator
-	 *
-	 * @return int
-	 */
-	public static function getIteratorSize(RecursiveIteratorIterator $iterator) : int{
-		$bytes = 0;
-		/**@var SplFileInfo $fileInfo */
-		foreach($iterator as $fileInfo){
-			$bytes += $fileInfo->getSize();
-		}
-
-		return $bytes;
-	}
-
-	/**
 	 * @param string   $path
 	 * @param string[] $filter
 	 *
@@ -156,14 +140,18 @@ final class Utils{
 		return new RecursiveIteratorIterator(
 			new RecursiveCallbackFilterIterator(
 				new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
-				static function(SplFileInfo $file, $key, RecursiveDirectoryIterator $iterator) use ($filter) : bool{
-					if($iterator->hasChildren() && !in_array($file->getFilename(), $filter)){
-						return true;
+				static function(SplFileInfo $file, string $key, RecursiveDirectoryIterator $iterator) use ($filter) : bool{
+					if(in_array($file->getFilename(), $filter)){
+						return false;
 					}
 
-					return $file->isFile();
+					return true;
 				}
 			), RecursiveIteratorIterator::SELF_FIRST
 		);
+	}
+
+	public static function scaleValue(float $value, float $x1, float $y1, float $x2, float $y2): float{
+		return ($y1 - $x1) * ($value - $x2) / ($y2 - $x2) + $x1;
 	}
 }
