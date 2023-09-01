@@ -23,40 +23,34 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\ftp;
 
-abstract class BaseFTPConnection{
-
+abstract class BaseFTPHandler{
+	public const NO_ERROR = 0;
 	public const ERR_CONNECT = -1;
 	public const ERR_DISCONNECT = -2;
 	public const ERR_LOGIN = -3;
 
-	protected string $host;
-	protected int $port;
-	protected string $username;
-	protected string $password;
-	protected string $remoteHomePath;
+	protected mixed $session = null;
 
-	public function __construct(string $host, int $port, string $username, string $password, string $remoteHomePath){
-		$this->host = $host;
-		$this->port = $port;
-		$this->username = $username;
-		$this->password = $password;
-		$this->remoteHomePath = $remoteHomePath;
+	public function __construct(
+		private readonly string $host,
+		private readonly int $port,
+		private readonly string $username,
+		private readonly string $password,
+		private readonly string $remoteHomePath
+	){
 	}
 
 	public abstract static function hasExtension() : bool;
 
 	public abstract function getProtocolName() : string;
 
-	public abstract function connect() : mixed;
+	public abstract function connect() : int;
 
-	/**
-	 * @param resource $connection
-	 */
-	public abstract function disconnect($connection) : bool;
+	public abstract function disconnect() : bool;
 
-	public abstract function putFile($connection, string $localFile, string $remoteFile) : bool;
+	public abstract function putFile(string $localFile, string $remoteFile) : bool;
 
-	public abstract function putDirectory($connection, string $remoteDirPath, int $mode = 0644) : bool;
+	public abstract function putDirectory(string $remoteDirPath, int $mode = 0644) : bool;
 
 	public final function getHost() : string{
 		return $this->host;
@@ -64,6 +58,14 @@ abstract class BaseFTPConnection{
 
 	public final function getPort() : int{
 		return $this->port;
+	}
+
+	final public function getUsername() : string{
+		return $this->username;
+	}
+
+	final public function getPassword() : string{
+		return $this->password;
 	}
 
 	public final function getHomePath() : string{

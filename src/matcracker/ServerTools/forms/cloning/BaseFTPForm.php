@@ -29,10 +29,12 @@ use dktapps\pmforms\element\CustomFormElement;
 use dktapps\pmforms\element\Input;
 use dktapps\pmforms\element\Label;
 use matcracker\ServerTools\forms\MainMenuForm;
-use matcracker\ServerTools\ftp\BaseFTPConnection;
+use matcracker\ServerTools\ftp\BaseFTPHandler;
 use matcracker\ServerTools\Main;
 use matcracker\ServerTools\utils\FormUtils;
 use pocketmine\player\Player;
+use pocketmine\utils\TextFormat;
+use function ctype_digit;
 
 abstract class BaseFTPForm extends CustomForm{
 	protected const FORM_KEY_LABEL = "label";
@@ -47,13 +49,21 @@ abstract class BaseFTPForm extends CustomForm{
 			$title,
 			$this->getFormElements(),
 			function(Player $player, CustomFormResponse $response) use ($plugin) : void{
-				$player->sendForm(new ExcludeFilesForm($plugin, $this->getConnection($response)));
+				$port = $response->getString(self::FORM_KEY_PORT);
+
+				if(!ctype_digit($port)){
+					$player->sendMessage(Main::formatMessage(TextFormat::RED . "Invalid port. The port must be a numeric value."));
+				}elseif(((int) $port < 1 || (int) $port > 65535)){
+					$player->sendMessage(Main::formatMessage(TextFormat::RED . "Invalid port range. The port must be in range 1-65535"));
+				}else{
+					$player->sendForm(new ExcludeFilesForm($plugin, $this, $this->getFTPHandler($response)));
+				}
 			},
 			FormUtils::onClose(new MainMenuForm($plugin))
 		);
 	}
 
-	protected abstract function getConnection(CustomFormResponse $response) : BaseFTPConnection;
+	protected abstract function getFTPHandler(CustomFormResponse $response) : BaseFTPHandler;
 
 	/**
 	 * @return CustomFormElement[]
@@ -62,7 +72,7 @@ abstract class BaseFTPForm extends CustomForm{
 		return [
 			new Label(self::FORM_KEY_LABEL, "The following form will not immediately validated."),
 			new Input(self::FORM_KEY_HOST, "Host address"),
-			new Slider(self::FORM_KEY_PORT, "Port", 1, 65535, default: 21),
+			new Input(self::FORM_KEY_PORT, "Port", defaultText: "21"),
 			new Input(self::FORM_KEY_USERNAME, "Username", "admin"),
 			new Input(self::FORM_KEY_PWD, "Password"),
 			new Input(self::FORM_KEY_PATH, "Remote home path", defaultText: "/")

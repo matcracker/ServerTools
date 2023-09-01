@@ -43,6 +43,7 @@ use function sprintf;
 final class Main extends PluginBase{
 	private const CONFIG_VERSION = 2;
 	public const PLUGIN_NAME = "ServerTools";
+	public bool $isCloning = false;
 
 	public static function formatMessage(string $message) : string{
 		return TextFormat::AQUA . sprintf("[%s] ", self::PLUGIN_NAME) . TextFormat::RESET . $message;

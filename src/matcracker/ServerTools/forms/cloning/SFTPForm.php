@@ -24,8 +24,8 @@ declare(strict_types=1);
 namespace matcracker\ServerTools\forms\cloning;
 
 use dktapps\pmforms\CustomFormResponse;
-use matcracker\ServerTools\ftp\BaseFTPConnection;
-use matcracker\ServerTools\ftp\SFTPConnection;
+use matcracker\ServerTools\ftp\BaseFTPHandler;
+use matcracker\ServerTools\ftp\SFTPHandler;
 use matcracker\ServerTools\Main;
 
 class SFTPForm extends BaseFTPForm{
@@ -34,8 +34,8 @@ class SFTPForm extends BaseFTPForm{
 		parent::__construct($plugin, "SFTP Settings");
 	}
 
-	protected function getConnection(CustomFormResponse $response) : BaseFTPConnection{
-		return new SFTPConnection(
+	protected function getFTPHandler(CustomFormResponse $response) : BaseFTPHandler{
+		return new SFTPHandler(
 			$response->getString(self::FORM_KEY_HOST),
 			(int) $response->getString(self::FORM_KEY_PORT),
 			$response->getString(self::FORM_KEY_USERNAME),

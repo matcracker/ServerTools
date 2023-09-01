@@ -24,17 +24,12 @@ declare(strict_types=1);
 namespace matcracker\ServerTools\utils;
 
 use DirectoryIterator;
-use FilesystemIterator;
 use pocketmine\utils\Utils as PMUtils;
-use RecursiveCallbackFilterIterator;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use SplFileInfo;
+use function array_merge;
 use function file_exists;
-use function in_array;
 use function preg_match;
 use function round;
-use function var_dump;
 
 final class Utils{
 
@@ -58,9 +53,9 @@ final class Utils{
 	 *
 	 * @param string $path
 	 *
-	 * @return string[][]|null File paths
+	 * @return SplFileInfo[] File paths
 	 */
-	public static function getSortedFileList(string $path) : ?array{
+	public static function getSortedFileList(string $path) : array{
 		if(!file_exists($path)){
 			return [];
 		}
@@ -75,20 +70,19 @@ final class Utils{
 			"file" => []
 		];
 
-		foreach($dirIterator as $fileInfo){
-			if($fileInfo->isDot()){
+		/** @var DirectoryIterator $iterator */
+		foreach($dirIterator as $iterator){
+			$fileInfo = $iterator->getFileInfo();
+			if($iterator->isDot()){
 				continue;
-			}
-
-			$name = $fileInfo->getFilename();
-			if($fileInfo->isDir()){
-				$fileList["dir"][] = $name;
+			}elseif($iterator->isDir()){
+				$fileList["dir"][] = $fileInfo;
 			}else{
-				$fileList["file"][] = $name;
+				$fileList["file"][] = $fileInfo;
 			}
 		}
 
-		return $fileList;
+		return array_merge($fileList["dir"], $fileList["file"]);
 	}
 
 	public static function isValidFileName(string $fileName) : bool{
@@ -128,30 +122,5 @@ final class Utils{
 
 	public static function isValidUnixFileName(string $fileName) : bool{
 		return !str_contains($fileName, "\x00") && preg_match("/[\/]/", $fileName) === 0;
-	}
-
-	/**
-	 * @param string   $path
-	 * @param string[] $filter
-	 *
-	 * @return RecursiveIteratorIterator
-	 */
-	public static function getRecursiveIterator(string $path, array $filter) : RecursiveIteratorIterator{
-		return new RecursiveIteratorIterator(
-			new RecursiveCallbackFilterIterator(
-				new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
-				static function(SplFileInfo $file, string $key, RecursiveDirectoryIterator $iterator) use ($filter) : bool{
-					if(in_array($file->getFilename(), $filter)){
-						return false;
-					}
-
-					return true;
-				}
-			), RecursiveIteratorIterator::SELF_FIRST
-		);
-	}
-
-	public static function scaleValue(float $value, float $x1, float $y1, float $x2, float $y2): float{
-		return ($y1 - $x1) * ($value - $x2) / ($y2 - $x2) + $x1;
 	}
 }

@@ -26,6 +26,7 @@ namespace matcracker\ServerTools;
 use matcracker\ServerTools\forms\files\FileEditorForm;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerEditBookEvent;
+use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\nbt\NoSuchTagException;
 use pocketmine\scheduler\ClosureTask;
 use pocketmine\utils\TextFormat;
@@ -37,6 +38,17 @@ final class EventListener implements Listener{
 
 	public function __construct(private readonly Main $plugin){
 
+	}
+
+	/**
+	 * @param PlayerPreLoginEvent $event
+	 *
+	 * @priority HIGHEST
+	 */
+	public function onPlayerPreLogin(PlayerPreLoginEvent $event) : void{
+		if($this->plugin->isCloning){
+			$event->setKickFlag(PlayerPreLoginEvent::KICK_FLAG_PLUGIN, "Cloning in progress. Retry later.");
+		}
 	}
 
 	public function onPlayerEditBook(PlayerEditBookEvent $event) : void{

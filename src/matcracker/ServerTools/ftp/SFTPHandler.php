@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\ftp;
 
+use UnexpectedValueException;
 use function extension_loaded;
 use function fclose;
 use function fopen;
@@ -33,7 +34,7 @@ use function ssh2_sftp;
 use function ssh2_sftp_mkdir;
 use function stream_copy_to_stream;
 
-final class SFTPConnection extends BaseFTPConnection{
+final class SFTPHandler extends BaseFTPHandler{
 
 	public static function hasExtension() : bool{
 		return extension_loaded("openssl") && extension_loaded("ssh2");
@@ -43,17 +44,14 @@ final class SFTPConnection extends BaseFTPConnection{
 		return "SFTP";
 	}
 
-	/**
-	 * @return int|resource
-	 */
-	public function connect() : mixed{
-		$session = @ssh2_connect($this->host, $this->port);
+	public function connect() : int{
+		$session = @ssh2_connect($this->getHost(), $this->getPort());
 
 		if($session === false){
 			return self::ERR_CONNECT;
 		}
 
-		if(!@ssh2_auth_password($session, $this->username, $this->password)){
+		if(!@ssh2_auth_password($session, $this->getUsername(), $this->getPassword())){
 			if(!@ssh2_disconnect($session)){
 				return self::ERR_DISCONNECT;
 			}
@@ -67,20 +65,30 @@ final class SFTPConnection extends BaseFTPConnection{
 			return self::ERR_CONNECT;
 		}
 
-		return $stream;
+		$this->session = $stream;
+
+		return self::NO_ERROR;
 	}
 
-	public function putDirectory($connection, string $remoteDirPath, int $mode = 0644) : bool{
-		return @ssh2_sftp_mkdir($connection, $remoteDirPath, $mode);
+	public function putDirectory(string $remoteDirPath, int $mode = 0644) : bool{
+		if($this->session === null){
+			throw new UnexpectedValueException("The session has not been initialized, call connect method before.");
+		}
+
+		return @ssh2_sftp_mkdir($this->session, $remoteDirPath, $mode);
 	}
 
-	public function putFile($connection, string $localFile, string $remoteFile) : bool{
+	public function putFile(string $localFile, string $remoteFile) : bool{
+		if($this->session === null){
+			throw new UnexpectedValueException("The session has not been initialized, call connect method before.");
+		}
+
 		$localRes = @fopen($localFile, "rb");
 		if($localRes === false){
 			return false;
 		}
 
-		$remoteRes = @fopen("ssh2.sftp://$connection$remoteFile", "wb");
+		$remoteRes = @fopen("ssh2.sftp://$this->session$remoteFile", "wb");
 		if($remoteRes === false){
 			return false;
 		}
@@ -92,10 +100,15 @@ final class SFTPConnection extends BaseFTPConnection{
 		return @fclose($remoteRes) && @fclose($localRes);
 	}
 
-	/**
-	 * @param resource $connection
-	 */
-	public function disconnect($connection) : bool{
-		return @ssh2_disconnect($connection);
+	public function disconnect() : bool{
+		if($this->session === null){
+			throw new UnexpectedValueException("The session has not been initialized, call connect method before.");
+		}
+
+		$result = @ssh2_disconnect($this->session);
+
+		$this->session = null;
+
+		return $result;
 	}
 }

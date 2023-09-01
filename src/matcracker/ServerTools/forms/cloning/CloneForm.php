@@ -26,8 +26,8 @@ namespace matcracker\ServerTools\forms\cloning;
 use dktapps\pmforms\MenuForm;
 use dktapps\pmforms\MenuOption;
 use matcracker\ServerTools\forms\MainMenuForm;
-use matcracker\ServerTools\ftp\FTPConnection;
-use matcracker\ServerTools\ftp\SFTPConnection;
+use matcracker\ServerTools\ftp\FTPHandler;
+use matcracker\ServerTools\ftp\SFTPHandler;
 use matcracker\ServerTools\Main;
 use matcracker\ServerTools\utils\FormUtils;
 use pocketmine\form\FormValidationException;
@@ -38,11 +38,11 @@ final class CloneForm extends MenuForm{
 	public function __construct(Main $plugin){
 		$options = [];
 
-		if(SFTPConnection::hasExtension()){
+		if(SFTPHandler::hasExtension()){
 			$options[] = new MenuOption("SFTP");
 		}
 
-		if(FTPConnection::hasExtension()){
+		if(FTPHandler::hasExtension()){
 			$options[] = new MenuOption("FTP");
 		}
 
@@ -52,7 +52,7 @@ final class CloneForm extends MenuForm{
 			$options,
 			function(Player $player, int $selectedOption) use($plugin) : void{
 				$form = match ($selectedOption) {
-					0 => SFTPConnection::hasExtension() ? new SFTPForm($plugin) : new FTPForm($plugin),
+					0 => SFTPHandler::hasExtension() ? new SFTPForm($plugin) : new FTPForm($plugin),
 					1 => new SFTPForm($plugin),
 					default => throw new FormValidationException("Unexpected option $selectedOption"),
 				};

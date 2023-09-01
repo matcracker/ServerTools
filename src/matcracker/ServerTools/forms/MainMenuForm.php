@@ -29,8 +29,8 @@ use matcracker\ServerTools\forms\elements\PermissibleMenuOption;
 use matcracker\ServerTools\forms\files\FileExplorerForm;
 use matcracker\ServerTools\forms\plugins\downloader\SearchPluginForm;
 use matcracker\ServerTools\forms\plugins\manager\PluginManagerForm;
-use matcracker\ServerTools\ftp\FTPConnection;
-use matcracker\ServerTools\ftp\SFTPConnection;
+use matcracker\ServerTools\ftp\FTPHandler;
+use matcracker\ServerTools\ftp\SFTPHandler;
 use matcracker\ServerTools\Main;
 use matcracker\ServerTools\utils\FormUtils;
 use pocketmine\player\Player;
@@ -63,7 +63,7 @@ final class MainMenuForm extends MenuForm{
 						$player->sendForm(new FileExplorerForm($plugin, $plugin->getServerDataPath(), $player));
 						break;
 					case 1:
-						if(FTPConnection::hasExtension() || SFTPConnection::hasExtension()){
+						if(FTPHandler::hasExtension() || SFTPHandler::hasExtension()){
 							$player->sendForm(new CloneForm($plugin));
 						}else{
 							$player->sendForm(FormUtils::getConfirmForm(

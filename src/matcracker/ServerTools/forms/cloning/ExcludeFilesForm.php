@@ -27,10 +27,9 @@ use dktapps\pmforms\CustomForm;
 use dktapps\pmforms\CustomFormResponse;
 use dktapps\pmforms\element\Label;
 use dktapps\pmforms\element\Toggle;
-use matcracker\ServerTools\forms\MainMenuForm;
-use matcracker\ServerTools\ftp\BaseFTPConnection;
+use matcracker\ServerTools\ftp\BaseFTPHandler;
 use matcracker\ServerTools\Main;
-use matcracker\ServerTools\task\async\FTPConnectionTask;
+use matcracker\ServerTools\task\async\FTPThread;
 use matcracker\ServerTools\utils\FormUtils;
 use matcracker\ServerTools\utils\Utils;
 use pocketmine\player\Player;
@@ -41,19 +40,18 @@ final class ExcludeFilesForm extends CustomForm{
 
 	private const KEY_EXCLUDE_FILES = "exclude_files";
 
-	public function __construct(Main $plugin, BaseFTPConnection $ftpConnection){
+	public function __construct(Main $plugin, BaseFTPForm $form, BaseFTPHandler $ftpHandler){
 		$elements = [
 			new Label(self::KEY_EXCLUDE_FILES, "Do you want to exclude something from the clone?")
 		];
 
-		$files = Utils::getSortedFileList($plugin->getServerDataPath());
-
-		foreach($files["dir"] as $dir){
-			$elements[] = new Toggle($dir, $dir);
-		}
-
-		foreach($files["file"] as $file){
-			$elements[] = new Toggle($file, $file);
+		$fileList = Utils::getSortedFileList($plugin->getServerDataPath());
+		/** @var array<string, string> $files */
+		$files = [];
+		foreach($fileList as $file){
+			$fileName = $file->getFilename();
+			$files[$fileName] = $file->getRealPath();
+			$elements[] = new Toggle($fileName, $fileName);
 		}
 
 		assert(count($elements) > 1);
@@ -61,31 +59,20 @@ final class ExcludeFilesForm extends CustomForm{
 		parent::__construct(
 			"Exclude files",
 			$elements,
-			static function(Player $player, CustomFormResponse $response) use ($plugin, $ftpConnection) : void{
-				/** @var string[] $filter */
-				$filter = [];
-
+			static function(Player $player, CustomFormResponse $response) use ($plugin, $ftpHandler, $files) : void{
 				foreach($response->getAll() as $fileNameKey => $toggled){
 					if($fileNameKey === self::KEY_EXCLUDE_FILES){
 						continue;
 					}
 
 					if($toggled){
-						$filter[] = $fileNameKey;
+						unset($files[$fileNameKey]);
 					}
 				}
 
-				$worlds = $plugin->getServer()->getWorldManager()->getWorlds();
-
-				foreach($worlds as $world){
-					$world->save(true);
-				}
-
-				$plugin->getServer()->getAsyncPool()->submitTask(
-					new FTPConnectionTask($ftpConnection, $plugin->getServerDataPath(), $filter, $player->getName())
-				);
+				new FTPThread($plugin, $ftpHandler, $files);
 			},
-			FormUtils::onClose(new MainMenuForm($plugin))
+			FormUtils::onClose($form)
 		);
 	}
 }

@@ -25,8 +25,8 @@ namespace matcracker\ServerTools\forms\cloning;
 
 use dktapps\pmforms\CustomFormResponse;
 use dktapps\pmforms\element\Toggle;
-use matcracker\ServerTools\ftp\BaseFTPConnection;
-use matcracker\ServerTools\ftp\FTPConnection;
+use matcracker\ServerTools\ftp\BaseFTPHandler;
+use matcracker\ServerTools\ftp\FTPHandler;
 use matcracker\ServerTools\Main;
 
 class FTPForm extends BaseFTPForm{
@@ -37,8 +37,8 @@ class FTPForm extends BaseFTPForm{
 		parent::__construct($plugin, "FTP Settings");
 	}
 
-	protected function getConnection(CustomFormResponse $response) : BaseFTPConnection{
-		return new FTPConnection(
+	protected function getFTPHandler(CustomFormResponse $response) : BaseFTPHandler{
+		return new FTPHandler(
 			$response->getString(self::FORM_KEY_HOST),
 			(int) $response->getString(self::FORM_KEY_PORT),
 			$response->getString(self::FORM_KEY_USERNAME),

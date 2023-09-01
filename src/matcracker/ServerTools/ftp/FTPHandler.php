@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace matcracker\ServerTools\ftp;
 
-use FTP\Connection;
+use UnexpectedValueException;
 use function extension_loaded;
 use function ftp_chdir;
 use function ftp_close;
@@ -33,7 +33,7 @@ use function ftp_mkdir;
 use function ftp_pasv;
 use function ftp_ssl_connect;
 
-final class FTPConnection extends BaseFTPConnection{
+class FTPHandler extends BaseFTPHandler{
 	private bool $ssl;
 
 	public function __construct(string $host, int $port, string $username, string $password, string $remoteHomePath, bool $ssl){
@@ -49,14 +49,14 @@ final class FTPConnection extends BaseFTPConnection{
 		return "FTP";
 	}
 
-	public function connect() : Connection|int{
-		$ftpConn = $this->ssl ? @ftp_ssl_connect($this->host, $this->port) : @ftp_connect($this->host, $this->port);
+	public function connect() : int{
+		$ftpConn = $this->ssl ? @ftp_ssl_connect($this->getHost(), $this->getPort()) : @ftp_connect($this->getHost(), $this->getPort());
 
 		if($ftpConn === false){
 			return self::ERR_CONNECT;
 		}
 
-		if(!@ftp_login($ftpConn, $this->username, $this->password)){
+		if(!@ftp_login($ftpConn, $this->getUsername(), $this->getPassword())){
 			if(!@ftp_close($ftpConn)){
 				return self::ERR_DISCONNECT;
 			}
@@ -66,25 +66,39 @@ final class FTPConnection extends BaseFTPConnection{
 
 		@ftp_pasv($ftpConn, true);
 
-		return $ftpConn;
+		$this->session = $ftpConn;
+
+		return self::NO_ERROR;
 	}
 
-	public function putDirectory($connection, string $remoteDirPath, int $mode = 0644) : bool{
-		if(!@ftp_chdir($connection, $remoteDirPath)){
-			return @ftp_mkdir($connection, $remoteDirPath) !== false;
+	public function putDirectory(string $remoteDirPath, int $mode = 0644) : bool{
+		if($this->session === null){
+			throw new UnexpectedValueException("The session has not been initialized, call connect method before.");
+		}
+
+		if(!@ftp_chdir($this->session, $remoteDirPath)){
+			return @ftp_mkdir($this->session, $remoteDirPath) !== false;
 		}
 
 		return true;
 	}
 
-	public function putFile($connection, string $localFile, string $remoteFile) : bool{
-		return @ftp_put($connection, $remoteFile, $localFile);
+	public function putFile(string $localFile, string $remoteFile) : bool{
+		if($this->session === null){
+			throw new UnexpectedValueException("The session has not been initialized, call connect method before.");
+		}
+
+		return @ftp_put($this->session, $remoteFile, $localFile);
 	}
 
-	/**
-	 * @param Connection $connection
-	 */
-	public function disconnect($connection) : bool{
-		return @ftp_close($connection);
+	public function disconnect() : bool{
+		if($this->session === null){
+			throw new UnexpectedValueException("The session has not been initialized, call connect method before.");
+		}
+
+		$result = @ftp_close($this->session);
+		$this->session = null;
+
+		return $result;
 	}
 }
