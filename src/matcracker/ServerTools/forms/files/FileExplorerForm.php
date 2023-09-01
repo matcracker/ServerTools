@@ -62,69 +62,55 @@ final class FileExplorerForm extends MenuForm{
 		/** @var TaggedMenuOption[] $options */
 		$options = [];
 
-		if($fileList === null){
-			$message = TextFormat::RED . "The directory does not exist.";
+		$hasPermission = $player->hasPermission("st.ui.file-explorer.write") || $plugin->canBypassPermission($player);
+
+		if($filePath !== $plugin->getServerDataPath()){
 			$options[] = $BACK_OPTION;
-
-		}else{
-			$hasPermission = $player->hasPermission("st.ui.file-explorer.write") || $plugin->canBypassPermission($player);
-
-			if($filePath !== $plugin->getServerDataPath()){
-				$options[] = $BACK_OPTION;
-
-				if($hasPermission){
-					$options[] = new TaggedMenuOption(
-						self::KEY_RENAME_FOLDER,
-						"Rename current folder",
-						new FormIcon("textures/ui/pencil_edit_icon.png", FormIcon::IMAGE_TYPE_PATH)
-					);
-					$options[] = new TaggedMenuOption(
-						self::KEY_DELETE_FOLDER,
-						"Delete current folder",
-						new FormIcon("textures/ui/trash.png", FormIcon::IMAGE_TYPE_PATH)
-					);
-				}
-			}
 
 			if($hasPermission){
 				$options[] = new TaggedMenuOption(
-					self::KEY_NEW_FOLDER,
-					"New folder",
-					new FormIcon("textures/ui/book_addpicture_default.png", FormIcon::IMAGE_TYPE_PATH)
+					self::KEY_RENAME_FOLDER,
+					"Rename current folder",
+					new FormIcon("textures/ui/pencil_edit_icon.png", FormIcon::IMAGE_TYPE_PATH)
 				);
 				$options[] = new TaggedMenuOption(
-					self::KEY_NEW_FILE,
-					"New file",
-					new FormIcon("textures/ui/book_addtextpage_default.png", FormIcon::IMAGE_TYPE_PATH)
+					self::KEY_DELETE_FOLDER,
+					"Delete current folder",
+					new FormIcon("textures/ui/trash.png", FormIcon::IMAGE_TYPE_PATH)
 				);
 			}
+		}
 
-			if(count($fileList) === 0){
-				$message =
-					$filePath . TextFormat::EOL .
-					TextFormat::BOLD . TextFormat::GOLD . "[EMPTY FOLDER]";
+		if($hasPermission){
+			$options[] = new TaggedMenuOption(
+				self::KEY_NEW_FOLDER,
+				"New folder",
+				new FormIcon("textures/ui/book_addpicture_default.png", FormIcon::IMAGE_TYPE_PATH)
+			);
+			$options[] = new TaggedMenuOption(
+				self::KEY_NEW_FILE,
+				"New file",
+				new FormIcon("textures/ui/book_addtextpage_default.png", FormIcon::IMAGE_TYPE_PATH)
+			);
+		}
 
-			}else{
-				$message = $filePath;
-				if(isset($fileList["dir"])){
-					foreach($fileList["dir"] as $dir){
-						$options[] = new TaggedMenuOption(
-							$dir,
-							$dir,
-							new FormIcon("textures/ui/storageIconColor.png", FormIcon::IMAGE_TYPE_PATH)
-						);
-					}
-				}
+		if(count($fileList) === 0){
+			$message = $filePath . TextFormat::EOL .
+				TextFormat::BOLD . TextFormat::GOLD . "[EMPTY FOLDER]";
 
-				if(isset($fileList["file"])){
-					foreach($fileList["file"] as $file){
-						$options[] = new TaggedMenuOption(
-							$file,
-							$file,
-							new FormIcon("textures/items/map_filled.png", FormIcon::IMAGE_TYPE_PATH)
-						);
-					}
-				}
+		}else{
+			$message = $filePath;
+
+			static $dirIcon = new FormIcon("textures/ui/storageIconColor.png", FormIcon::IMAGE_TYPE_PATH);
+			static $fileIcon = new FormIcon("textures/items/map_filled.png", FormIcon::IMAGE_TYPE_PATH);
+
+			foreach($fileList as $fileInfo){
+				$name = $fileInfo->getFilename();
+				$options[] = new TaggedMenuOption(
+					$name,
+					$name,
+					$fileInfo->isDir() ? $dirIcon : $fileIcon
+				);
 			}
 		}
 
