@@ -28,6 +28,7 @@ use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use pocketmine\utils\Internet;
 use pocketmine\utils\TextFormat;
+use Symfony\Component\Filesystem\Path;
 use function file_put_contents;
 
 final class DownloadPluginTask extends AsyncTask{
@@ -47,7 +48,7 @@ final class DownloadPluginTask extends AsyncTask{
 		$request = Internet::getURL("$this->artifactUrl/$this->pluginName.phar", $this->timeout);
 
 		if($request !== null){
-			$this->setResult(file_put_contents($this->pluginPath . $this->pluginName . ".phar", $request->getBody()) !== false);
+			$this->setResult(file_put_contents(Path::join($this->pluginPath, "$this->pluginName.phar"), $request->getBody()) !== false);
 		}else{
 			$this->setResult(false);
 		}
@@ -62,9 +63,11 @@ final class DownloadPluginTask extends AsyncTask{
 		/** @var bool $success */
 		$success = $this->getResult();
 		if($success){
-			$player->sendMessage(Main::formatMessage(TextFormat::GREEN . "$this->pluginName successfully downloaded."));
+			$message = TextFormat::GREEN . "$this->pluginName successfully downloaded.";
 		}else{
-			$player->sendMessage(Main::formatMessage(TextFormat::RED . "Could not download $this->pluginName plugin."));
+			$message = TextFormat::RED . "Could not download $this->pluginName plugin.";
 		}
+
+		$player->sendMessage(Main::formatMessage($message));
 	}
 }
